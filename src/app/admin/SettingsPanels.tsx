@@ -270,35 +270,12 @@ export function ContactPanel({ data, update }: { data: SiteData; update: Update 
         </div>
       </Card>
 
-      <Card title="Name & tagline">
-        <div className="grid gap-5 sm:grid-cols-2">
-          <Field label="Practice name">
-            <TextInput value={data.brand.name} onChange={(name) => setBrand({ name })} />
-          </Field>
-          <Field preview="brand.tagline" label="Tagline">
-            <TextInput value={data.brand.tagline} onChange={(tagline) => setBrand({ tagline })} />
-          </Field>
-        </div>
-        <Field
-          preview="brand.disciplines"
-          label="Disciplines line"
-          hint="Shown above the home page headline."
-        >
-          <TextInput
-            value={data.brand.disciplines}
-            onChange={(disciplines) => setBrand({ disciplines })}
-          />
-        </Field>
-        <Field
-          preview="description"
-          label="Site description"
-          hint="Used by Google and link previews."
-        >
-          <TextArea
-            rows={3}
-            value={data.description}
-            onChange={(description) => update((d) => ({ ...d, description }))}
-          />
+      <Card
+        title="Practice name"
+        hint="Used in page titles and link previews. The headline and home page text are under 'Home page'."
+      >
+        <Field label="Practice name">
+          <TextInput value={data.brand.name} onChange={(name) => setBrand({ name })} />
         </Field>
       </Card>
     </div>
@@ -314,9 +291,34 @@ export function HomePanel({ data, update }: { data: SiteData; update: Update }) 
     update((d) => ({ ...d, testimonials: { ...d.testimonials, ...patch } }));
   const setR = (patch: Partial<SiteData["reels"]>) =>
     update((d) => ({ ...d, reels: { ...d.reels, ...patch } }));
+  const setBrand = (patch: Partial<SiteData["brand"]>) =>
+    update((d) => ({ ...d, brand: { ...d.brand, ...patch } }));
 
   return (
     <div className="space-y-5">
+      <Card title="Top of the home page" hint="The text over the big photo.">
+        <Field preview="brand.disciplines" label="Small line above the headline">
+          <TextInput
+            value={data.brand.disciplines}
+            onChange={(disciplines) => setBrand({ disciplines })}
+          />
+        </Field>
+        <Field preview="brand.tagline" label="Headline" hint="Also shown in the footer.">
+          <TextInput value={data.brand.tagline} onChange={(tagline) => setBrand({ tagline })} />
+        </Field>
+        <Field
+          preview="description"
+          label="Paragraph under the headline"
+          hint="Also what Google and link previews show for the site."
+        >
+          <TextArea
+            rows={3}
+            value={data.description}
+            onChange={(description) => update((d) => ({ ...d, description }))}
+          />
+        </Field>
+      </Card>
+
       <Card title="Client quotes">
         <Toggle
           checked={t.show}
