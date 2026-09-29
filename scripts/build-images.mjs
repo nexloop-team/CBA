@@ -14,7 +14,8 @@
  * Incremental: an image is reprocessed only when its source is newer than its
  * manifest entry. Pass --force to rebuild everything.
  */
-import { readFile, readdir, mkdir, writeFile, stat, rm } from "node:fs/promises";
+import { readFile, readdir, mkdir, writeFile, rm, cp } from "node:fs/promises";
+import { createHash } from "node:crypto";
 import { existsSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -25,6 +26,32 @@ import { buildOgCards, buildIcons, readBrand } from "./build-brand-assets.mjs";
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const PROJECTS_DIR = path.join(ROOT, "content", "projects");
 const OUT_DIR = path.join(ROOT, "public", "media");
+
+/**
+ * Derivatives survive between deploys in the host's build cache. Vercel
+ * restores .next/cache before every build, so after the first deploy only new
+ * or changed photos are encoded instead of all of them.
+ */
+const BUILD_CACHE = path.join(ROOT, ".next", "cache", "cba-images");
+const SAVE_BUILD_CACHE = Boolean(process.env.VERCEL || process.env.CI);
+
+/**
+ * Anything that changes the output. Part of each image's cache key, so editing
+ * a width or quality setting re-encodes everything on the next build.
+ */
+const PIPELINE = "widths=480,768,1200,1600,2000,2560,3200;avif=70/2;webp=86;jpg=82;v1";
+
+/**
+ * Cache key from the file's bytes, not its modified time: a fresh git clone
+ * (every deploy) gives every file a new mtime, which made each build re-encode
+ * every image from scratch.
+ */
+async function sourceHash(file) {
+  return createHash("sha1")
+    .update(PIPELINE)
+    .update(await readFile(file))
+    .digest("hex");
+}
 /** House rule: a project shows at most this many images. Extras stay on disk, unused. */
 const MAX_IMAGES = 6;
 const MANIFEST = path.join(ROOT, ".generated", "images.json");
@@ -96,8 +123,12 @@ async function processImage({ slug, name, srcPath, title, altOverride, index }) 
   for (const w of widths) {
     const resized = () => sharp(srcPath, { failOn: "none" }).rotate().resize({ width: w });
     await Promise.all([
-      resized().avif({ quality: 70, effort: 4 }).toFile(path.join(destDir, `${stemName}-${w}.avif`)),
-      resized().webp({ quality: 86 }).toFile(path.join(destDir, `${stemName}-${w}.webp`)),
+      resized()
+        .avif({ quality: 70, effort: 2 })
+        .toFile(path.join(destDir, `${stemName}-${w}.avif`)),
+      resized()
+        .webp({ quality: 86 })
+        .toFile(path.join(destDir, `${stemName}-${w}.webp`)),
     ]);
   }
 
@@ -153,6 +184,13 @@ async function main() {
     console.log("cleared public/media for a forced rebuild");
   }
 
+  if (!FORCE && !existsSync(MANIFEST) && existsSync(path.join(BUILD_CACHE, "images.json"))) {
+    await cp(path.join(BUILD_CACHE, "media"), OUT_DIR, { recursive: true });
+    await mkdir(path.dirname(MANIFEST), { recursive: true });
+    await cp(path.join(BUILD_CACHE, "images.json"), MANIFEST);
+    console.log("images: restored previous derivatives from the build cache");
+  }
+
   let previous = {};
   if (!FORCE && existsSync(MANIFEST)) {
     try {
@@ -204,10 +242,10 @@ async function main() {
 
     const entries = [];
     for (const [index, [name, srcPath]] of sources.entries()) {
-      const mtime = (await stat(srcPath)).mtimeMs;
+      const hash = await sourceHash(srcPath);
       const cached = previous[slug]?.find((e) => e.src === name);
 
-      if (cached && cached._mtime === mtime && existsSync(path.join(OUT_DIR, slug))) {
+      if (cached && cached._hash === hash && existsSync(path.join(OUT_DIR, slug))) {
         entries.push({ ...cached, alt: alts[name] ?? cached.alt });
         reused++;
         continue;
@@ -222,7 +260,7 @@ async function main() {
           altOverride: alts[name],
           index,
         });
-        entries.push({ ...entry, _mtime: mtime });
+        entries.push({ ...entry, _hash: hash });
         processed++;
       } catch (err) {
         warnings.push(`${slug}/${name}: ${err.message}`);
@@ -230,6 +268,7 @@ async function main() {
     }
 
     manifest[slug] = entries;
+    console.log(`images: ${slug} - ${entries.length} image(s)`);
   }
 
   // Single images chosen in /admin -> Settings. Stored as repo paths such as
@@ -242,26 +281,41 @@ async function main() {
       return null;
     }
     const name = path.basename(srcPath);
-    const mtime = (await stat(srcPath)).mtimeMs;
+    const hash = await sourceHash(srcPath);
     const cached = previous[group]?.find((e) => e && e.src === name);
-    if (cached && cached._mtime === mtime && existsSync(path.join(OUT_DIR, group))) {
+    if (cached && cached._hash === hash && existsSync(path.join(OUT_DIR, group))) {
       reused++;
       return { ...cached, alt };
     }
     processed++;
-    const entry = await processImage({ slug: group, name, srcPath, title: alt, altOverride: alt, index: 0 });
-    return { ...entry, _mtime: mtime };
+    const entry = await processImage({
+      slug: group,
+      name,
+      srcPath,
+      title: alt,
+      altOverride: alt,
+      index: 0,
+    });
+    return { ...entry, _hash: hash };
   }
 
-  const siteSettings = JSON.parse(await readFile(path.join(ROOT, "content", "settings", "services.json"), "utf8"));
+  const siteSettings = JSON.parse(
+    await readFile(path.join(ROOT, "content", "settings", "services.json"), "utf8"),
+  );
   // Null keeps a service without an image from shifting the rest along.
   manifest.services = [];
   for (const service of siteSettings.services ?? []) {
     manifest.services.push(await settingsImage("services", service.image, service.title));
   }
 
-  const studioSettings = JSON.parse(await readFile(path.join(ROOT, "content", "settings", "studio.json"), "utf8"));
-  const portrait = await settingsImage("studio", studioSettings.founder?.portrait, studioSettings.founder?.name ?? "Portrait");
+  const studioSettings = JSON.parse(
+    await readFile(path.join(ROOT, "content", "settings", "studio.json"), "utf8"),
+  );
+  const portrait = await settingsImage(
+    "studio",
+    studioSettings.founder?.portrait,
+    studioSettings.founder?.name ?? "Portrait",
+  );
   manifest.studio = portrait ? [portrait] : [];
 
   await mkdir(path.dirname(MANIFEST), { recursive: true });
@@ -291,6 +345,14 @@ async function main() {
     `images: ${slugs.length} project(s), ${total} image(s) - ${processed} processed, ${reused} reused`,
   );
   console.log(`assets: ${og.count} OG card(s), ${icons.count} icon(s)`);
+
+  if (SAVE_BUILD_CACHE) {
+    await rm(BUILD_CACHE, { recursive: true, force: true });
+    await mkdir(BUILD_CACHE, { recursive: true });
+    await cp(OUT_DIR, path.join(BUILD_CACHE, "media"), { recursive: true });
+    await cp(MANIFEST, path.join(BUILD_CACHE, "images.json"));
+    console.log("images: saved derivatives to the build cache");
+  }
   for (const w of warnings) console.warn(`  warn: ${w}`);
 }
 

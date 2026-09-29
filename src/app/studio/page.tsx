@@ -20,8 +20,7 @@ export default function StudioPage() {
 
   // The uploaded portrait when there is one (/admin -> Studio), otherwise a
   // project photograph stands in.
-  const portraitStandIn =
-    getStudioPortrait() ?? projects[0]?.images[2] ?? projects[0]?.heroImage;
+  const portraitStandIn = getStudioPortrait() ?? projects[0]?.images[2] ?? projects[0]?.heroImage;
 
   return (
     <>
@@ -63,9 +62,7 @@ export default function StudioPage() {
               {studio.about.map((p) => (
                 <RevealText key={p.slice(0, 24)}>{p}</RevealText>
               ))}
-              {studio.founder.bio && (
-                <RevealText>{studio.founder.bio}</RevealText>
-              )}
+              {studio.founder.bio && <RevealText>{studio.founder.bio}</RevealText>}
             </div>
             {studio.credentials && <p className="label text-ink/45 mt-8">{studio.credentials}</p>}
           </div>

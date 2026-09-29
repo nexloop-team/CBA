@@ -6,7 +6,13 @@ import Stats from "@/components/sections/Stats";
 import Testimonials from "@/components/sections/Testimonials";
 import Reels from "@/components/sections/Reels";
 import ContactBand from "@/components/sections/ContactBand";
-import { getAllProjects, getBandImage, getFeatured, getServiceImages } from "@/lib/content";
+import {
+  getAllProjects,
+  getBandImage,
+  getFeatured,
+  getPlayableReels,
+  getServiceImages,
+} from "@/lib/content";
 import type { Project, ProjectImage, ProjectSummary } from "@/types/project";
 
 /** Strips body + gallery so the carousel payload stays small. */
@@ -78,7 +84,7 @@ export default function HomePage() {
         <FeaturedWorks projects={featured.map(toSummary)} />
         <Services images={serviceImages} />
         {/* Reels fill the "In the detail" slot. Renders nothing until content/reels.ts has entries. */}
-        <Reels />
+        <Reels reels={getPlayableReels()} />
         <Stats />
         <Testimonials />
         <ContactBand image={contactImage} />

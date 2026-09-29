@@ -6,7 +6,7 @@ import { ArrowLeft, ArrowRight, Play, Volume2, VolumeX } from "lucide-react";
 import SectionIndex from "@/components/ui/SectionIndex";
 import IconButton from "@/components/ui/IconButton";
 import { useReducedMotion } from "@/lib/gsap";
-import { reels } from "@content/reels";
+import type { Reel } from "@content/reels";
 import { site } from "@content/site";
 import { cn, pad2 } from "@/lib/utils";
 
@@ -25,7 +25,7 @@ import { cn, pad2 } from "@/lib/utils";
  *  - Under prefers-reduced-motion nothing autoplays at all; each clip shows its
  *    poster with a play button and waits to be asked.
  */
-export default function Reels() {
+export default function Reels({ reels }: { reels: Reel[] }) {
   const track = useRef<HTMLUListElement>(null);
   const [unmuted, setUnmuted] = useState<Set<string>>(new Set());
   const [manuallyPaused, setManuallyPaused] = useState<Set<string>>(new Set());
@@ -75,7 +75,7 @@ export default function Reels() {
 
     for (const video of videos) observer.observe(video);
     return () => observer.disconnect();
-  }, [reduced, manuallyPaused]);
+  }, [reduced, manuallyPaused, reels]);
 
   const toggle = useCallback((name: string) => {
     const video = track.current?.querySelector<HTMLVideoElement>(`video[data-reel="${name}"]`);

@@ -9,6 +9,7 @@ import {
   type ProjectImage,
   type ProjectSummary,
 } from "@/types/project";
+import { reels, type Reel } from "@content/reels";
 
 const ROOT = process.cwd();
 const PROJECTS_DIR = path.join(ROOT, "content", "projects");
@@ -217,6 +218,17 @@ export function getServiceImages(): (ProjectImage | undefined)[] {
   // Entries are null where a service has no image, so indexes stay aligned.
   const services = (loadManifest().services ?? []) as (ManifestEntry | null)[];
   return services.map((image) => image ?? undefined);
+}
+
+/**
+ * Reels whose video file is actually present in public/reels. The videos are
+ * not in git, so a deploy built from the repo alone would otherwise show a row
+ * of broken players; with none present the section hides itself.
+ */
+export function getPlayableReels(): Reel[] {
+  return reels.filter((reel) =>
+    fs.existsSync(path.join(ROOT, "public", "reels", `${reel.name}.mp4`)),
+  );
 }
 
 /** The founder portrait uploaded through /admin, if any. */
