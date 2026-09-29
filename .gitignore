@@ -49,8 +49,6 @@ next-env.d.ts
 /public/media
 /.generated
 /public/icons
-/public/reels/*
-!/public/reels/README.md
 
 # Raw client image drops (originals; processed copies live in content/projects)
 /AVANTIKA*

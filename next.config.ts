@@ -10,6 +10,9 @@ const nextConfig: NextConfig = {
    * scripts/build-images.mjs, so the Next image optimizer stays off.
    */
   trailingSlash: true,
+  // Pages still get their trailing slash, from src/proxy.ts - which leaves
+  // /api/github alone so admin saves are not redirected (and re-sent).
+  skipTrailingSlashRedirect: true,
   images: { unoptimized: true },
 };
 

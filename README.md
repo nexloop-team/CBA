@@ -242,21 +242,23 @@ The reel videos in `public/reels/` are not in git (they are large), so the
 
 ### Editing on the live site (/admin)
 
-Saving on the live site commits to GitHub, and Vercel redeploys a minute or two
-later. Signing in needs a GitHub OAuth app, set up once:
+`/admin` asks for one shared password. Saving commits to GitHub through the
+site's own server (`/api/github`), and Vercel redeploys a minute or two later.
+Editors need no GitHub account.
 
-1. GitHub -> Settings -> Developer settings -> OAuth Apps -> **New OAuth App**
-   (or under the `nexloop-team` organisation's settings).
-   - Homepage URL: the site's address, e.g. `https://cba-xxxx.vercel.app`
-   - Authorization callback URL: the same address + `/api/callback/`
-2. Generate a client secret.
-3. Vercel -> the project -> Settings -> Environment Variables: add
-   `GITHUB_OAUTH_CLIENT_ID` and `GITHUB_OAUTH_CLIENT_SECRET`, then redeploy.
-4. Anyone editing needs a GitHub account with write access to the repo. If the
-   organisation restricts third-party apps, an owner must approve the OAuth app
-   (Organisation settings -> Third-party access).
+One-off setup, in Vercel -> the project -> Settings -> Environment Variables:
 
-When the domain changes, update both URLs in the OAuth app.
+| Name | Value |
+|---|---|
+| `ADMIN_PASSWORD` | the password editors will use |
+| `GITHUB_TOKEN` | a GitHub fine-grained token: github.com -> Settings -> Developer settings -> Personal access tokens -> Fine-grained -> Generate. Repository access: only `nexloop-team/CBA`. Permissions: **Contents: Read and write**. |
+
+Redeploy after adding them. Changing either value signs everyone out. Every
+edit is committed as the token's owner.
+
+Photos over ~3 MB are scaled to 3600px in the browser before upload
+(`public/admin-upload.js`), because Vercel functions accept at most 4.5 MB per
+request.
 
 ---
 

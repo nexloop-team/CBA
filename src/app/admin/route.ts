@@ -30,6 +30,7 @@ export function GET() {
   <script>window.CMS_MANUAL_INIT = true;</script>
   <script src="${DECAP}"></script>
   <script src="/admin-preview.js"></script>
+  <script src="/admin-upload.js"></script>
   <script>
     (function () {
       var config = ${JSON.stringify(cmsConfig)};
@@ -37,14 +38,15 @@ export function GET() {
       if (!local && !${JSON.stringify(onlineEditingConfigured)}) {
         document.body.innerHTML =
           '<div class="cba-note"><h1>Online editing is not switched on yet</h1>' +
-          '<p>Add GITHUB_OAUTH_CLIENT_ID and GITHUB_OAUTH_CLIENT_SECRET to the ' +
+          '<p>Add ADMIN_PASSWORD and GITHUB_TOKEN to the ' +
           'Vercel project and redeploy - see README.</p>' +
           '<p>Meanwhile, run <code>npm run admin</code> on the studio computer and open ' +
           '<code>http://localhost:3000/admin</code>.</p></div>';
         return;
       }
-      // The login popup lives on whichever domain this page was opened on.
+      // Sign-in and every GitHub call go through this site's own server.
       config.backend.base_url = location.origin;
+      config.backend.api_root = location.origin + "/api/github";
       window.CMS.init({ config: config });
     })();
   </script>

@@ -7,11 +7,12 @@
  * Saving:
  *  - On localhost, Decap talks to `decap-server` (started by `npm run admin`),
  *    which writes straight into content/ on this machine.
- *  - On the live site it commits to the GitHub repo, and Vercel redeploys.
- *    Signing in goes through /api/auth and /api/callback, which need
- *    GITHUB_OAUTH_CLIENT_ID and GITHUB_OAUTH_CLIENT_SECRET set on Vercel.
- *    Without them the live /admin says so instead of showing a broken login.
+ *  - On the live site it signs in with a shared password (/api/auth) and
+ *    commits to the GitHub repo through /api/github, which holds the GitHub
+ *    key server-side. Vercel then redeploys. Needs ADMIN_PASSWORD and
+ *    GITHUB_TOKEN set on Vercel; without them the live /admin says so.
  */
+import { adminConfigured } from "@/lib/admin-session";
 import { site } from "@content/site";
 
 const optional = { required: false } as const;
@@ -27,8 +28,8 @@ const settingsImage = (label: string, folder: string, hint?: string) => ({
   hint,
 });
 
-/** True when the Vercel project has the GitHub OAuth app configured. */
-export const onlineEditingConfigured = Boolean(process.env.GITHUB_OAUTH_CLIENT_ID);
+/** True when the Vercel project has ADMIN_PASSWORD and GITHUB_TOKEN set. */
+export const onlineEditingConfigured = adminConfigured();
 
 export const cmsConfig = {
   load_config_file: false,
@@ -37,8 +38,8 @@ export const cmsConfig = {
     name: "github",
     repo: process.env.CMS_GITHUB_REPO ?? "nexloop-team/CBA",
     branch: process.env.CMS_GITHUB_BRANCH ?? "main",
-    // base_url is set to the page's own origin in route.ts, so the login
-    // works on the production domain and on preview deployments alike.
+    // base_url and api_root are set to the page's own origin in route.ts, so
+    // sign-in and saving work on any of the project's domains.
     auth_endpoint: "api/auth",
   },
   site_url: site.url,
