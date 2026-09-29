@@ -54,7 +54,7 @@ export const cmsConfig = {
       label: "Projects",
       label_singular: "Project",
       description:
-        "Every project on the site. After saving, the dev site updates within a few seconds; run `npm run build` and deploy to publish.",
+        "Every project on the site. After you publish a change, the live site updates in a few minutes.",
       folder: "content/projects",
       path: "{{slug}}/index",
       slug: "{{slug}}",
