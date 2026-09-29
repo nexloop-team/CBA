@@ -322,7 +322,10 @@ async function main() {
   // rather than the disk: files under public/ are not readable from the server
   // when a page re-renders after an /admin save.
   manifest.reelFiles = (await listDir(path.join(ROOT, "public", "reels")))
-    .filter((entry) => entry.isFile() && /\.mp4$/i.test(entry.name))
+    // Not the phone cuts (-sm.mp4) - they are variants of a reel, not reels.
+    .filter(
+      (entry) => entry.isFile() && /\.mp4$/i.test(entry.name) && !/-sm\.mp4$/i.test(entry.name),
+    )
     .map((entry) => entry.name.replace(/\.mp4$/i, ""));
 
   await mkdir(path.dirname(MANIFEST), { recursive: true });

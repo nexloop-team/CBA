@@ -163,14 +163,21 @@ export default function Reels({ reels }: { reels: Reel[] }) {
                 <video
                   data-reel={reel.name}
                   className="size-full object-cover"
-                  poster={`/reels/${reel.name}.jpg`}
+                  poster={`/reels/${reel.name}.webp`}
                   muted={!unmuted.has(reel.name)}
                   loop
                   playsInline
                   preload="none"
                   aria-label={reel.alt}
                 >
-                  <source src={`/reels/${reel.name}.webm`} type="video/webm" />
+                  {/* Phones get the 720p, 2.5 Mbit/s cut (scripts/make-reel-variants.mjs);
+                      the full 1080p file would stall on mobile data. There is no
+                      .webm - listing one cost every reel a failed request first. */}
+                  <source
+                    src={`/reels/${reel.name}-sm.mp4`}
+                    type="video/mp4"
+                    media="(max-width: 767px)"
+                  />
                   <source src={`/reels/${reel.name}.mp4`} type="video/mp4" />
                 </video>
 
