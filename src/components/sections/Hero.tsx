@@ -5,7 +5,7 @@ import { ArrowDown } from "lucide-react";
 import Figure from "@/components/ui/Figure";
 import RevealText from "@/components/ui/RevealText";
 import type { ProjectImage } from "@/types/project";
-import { site } from "@content/site";
+import { useSite } from "@/components/layout/SiteProvider";
 import { gsap, useGSAP, prefersReducedMotion } from "@/lib/gsap";
 import { cn, scrimClass } from "@/lib/utils";
 
@@ -38,6 +38,7 @@ import { cn, scrimClass } from "@/lib/utils";
  * position directly sidesteps that entirely and is cheaper per frame.
  */
 export default function Hero({ image }: { image: ProjectImage }) {
+  const site = useSite();
   const root = useRef<HTMLElement>(null);
   const media = useRef<HTMLDivElement>(null);
   const content = useRef<HTMLDivElement>(null);

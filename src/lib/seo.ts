@@ -1,11 +1,11 @@
-import { site } from "@content/site";
+import type { Site } from "@content/site";
 
 /**
  * Organisation-level structured data. Emitted once, in the root layout.
  * ProfessionalService is the closest schema.org type for an architecture
  * practice that also builds.
  */
-export function organisationJsonLd() {
+export function organisationJsonLd(site: Site) {
   return {
     "@context": "https://schema.org",
     "@type": ["ProfessionalService", "GeneralContractor"],

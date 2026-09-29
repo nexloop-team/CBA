@@ -4,18 +4,17 @@ import { createHmac, createHash, timingSafeEqual } from "node:crypto";
  * Password login for /admin.
  *
  * One shared password (ADMIN_PASSWORD on Vercel). A correct password gets a
- * signed, HttpOnly session cookie; the GitHub proxy at /api/github only works
- * with that cookie. The GitHub key (GITHUB_TOKEN) never leaves the server.
+ * signed, HttpOnly session cookie, which every /api/admin route checks.
  *
- * Changing ADMIN_PASSWORD or GITHUB_TOKEN signs everyone out, because both are
- * part of the signing key.
+ * Changing ADMIN_PASSWORD signs everyone out, because it is part of the
+ * signing key (with the Blob store's token, which never leaves the server).
  */
 export const SESSION_COOKIE = "cba_admin";
 const SESSION_HOURS = 12;
 
 function signingKey(): string | null {
   const password = process.env.ADMIN_PASSWORD;
-  const token = process.env.GITHUB_TOKEN;
+  const token = process.env.BLOB_READ_WRITE_TOKEN;
   return password && token ? `${password}\u0000${token}` : null;
 }
 
@@ -38,6 +37,10 @@ export function createSessionCookie(): string | null {
   const expires = Date.now() + SESSION_HOURS * 3600_000;
   const value = `${expires}.${sign(expires, key)}`;
   return `${SESSION_COOKIE}=${value}; Path=/api; HttpOnly; Secure; SameSite=Strict; Max-Age=${SESSION_HOURS * 3600}`;
+}
+
+export function clearSessionCookie(): string {
+  return `${SESSION_COOKIE}=; Path=/api; HttpOnly; Secure; SameSite=Strict; Max-Age=0`;
 }
 
 export function hasValidSession(request: Request): boolean {

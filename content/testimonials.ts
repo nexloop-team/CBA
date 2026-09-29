@@ -1,15 +1,5 @@
 /**
- * Client quotes. Edited through /admin - the data lives in
- * settings/testimonials.json, where `show` hides the whole section.
+ * Client quotes are edited in /admin and live in the data document - see
+ * src/lib/site-data.ts. `show: false` there hides the section.
  */
-import data from "./settings/testimonials.json";
-
-export interface Testimonial {
-  quote: string;
-  author: string;
-  role: string;
-  company?: string;
-}
-
-export const showTestimonials = data.show;
-export const testimonials: Testimonial[] = data.show ? data.items : [];
+export type { Testimonial } from "@/types/site-data";

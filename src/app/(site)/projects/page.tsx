@@ -11,10 +11,12 @@ export const metadata: Metadata = {
     "Architecture, interior and engineering projects by Chetan Borkar Associates across Maharashtra.",
 };
 
-export default function ProjectsPage() {
-  const projects = getProjectSummaries();
-  const categories = getUsedCategories();
-  const all = getAllProjects();
+export default async function ProjectsPage() {
+  const [projects, categories, all] = await Promise.all([
+    getProjectSummaries(),
+    getUsedCategories(),
+    getAllProjects(),
+  ]);
 
   return (
     <>

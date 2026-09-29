@@ -4,7 +4,8 @@ import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import { Link } from "next-view-transitions";
 import { MessageCircle } from "lucide-react";
-import { site, telHref, whatsappHref } from "@content/site";
+import { telHref, whatsappHref } from "@content/site";
+import { useSite } from "@/components/layout/SiteProvider";
 import { cn } from "@/lib/utils";
 
 /**
@@ -17,6 +18,7 @@ import { cn } from "@/lib/utils";
  * [data-transparent] and the [data-hero] marker on those sections.
  */
 export default function Header() {
+  const site = useSite();
   const pathname = usePathname();
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
@@ -115,7 +117,7 @@ export default function Header() {
 
         <div className="flex items-center gap-4">
           <a
-            href={telHref}
+            href={telHref(site)}
             data-nav-item
             // relative: the coarse-pointer overlay in globals.css positions
             // against this box, and without it the overlay would resolve
@@ -125,7 +127,7 @@ export default function Header() {
             {site.contact.phoneDisplay}
           </a>
           <a
-            href={whatsappHref}
+            href={whatsappHref(site)}
             target="_blank"
             rel="noopener noreferrer"
             aria-label="Chat on WhatsApp"
@@ -192,7 +194,7 @@ export default function Header() {
             targets rather than a line of small print. */}
         <div className="mt-6 flex flex-col gap-3">
           <a
-            href={whatsappHref}
+            href={whatsappHref(site)}
             target="_blank"
             rel="noopener noreferrer"
             data-tap
@@ -201,7 +203,7 @@ export default function Header() {
             Message on WhatsApp
           </a>
           <a
-            href={telHref}
+            href={telHref(site)}
             data-tap
             data-numeric
             className="label border-line inline-flex items-center justify-center rounded-full border px-6"

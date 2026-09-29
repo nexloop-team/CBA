@@ -1,14 +1,12 @@
 import type { MetadataRoute } from "next";
 import { getAllProjects, getProjectModified } from "@/lib/content";
-import { site } from "@content/site";
+import { SITE_URL } from "@content/site";
 
-/** Generated at build time and emitted into out/sitemap.xml. */
-/** Route handlers must opt in explicitly under `output: "export"`. */
-export const dynamic = "force-static";
+/** Regenerated whenever /admin saves, like the pages. */
 
-export default function sitemap(): MetadataRoute.Sitemap {
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const staticRoutes = ["", "/projects", "/studio", "/contact"].map((route) => ({
-    url: `${site.url}${route}/`.replace(/\/+$/, "/"),
+    url: `${SITE_URL}${route}/`.replace(/\/+$/, "/"),
     lastModified: new Date(),
     changeFrequency: "monthly" as const,
     priority: route === "" ? 1 : 0.8,
@@ -16,12 +14,15 @@ export default function sitemap(): MetadataRoute.Sitemap {
 
   // Real modification times, so the value means something to a crawler instead
   // of just recording when the site last happened to deploy.
-  const projectRoutes = getAllProjects().map((project) => ({
-    url: `${site.url}/projects/${project.slug}/`,
-    lastModified: getProjectModified(project.slug),
-    changeFrequency: "yearly" as const,
-    priority: 0.6,
-  }));
+  const projects = await getAllProjects();
+  const projectRoutes = await Promise.all(
+    projects.map(async (project) => ({
+      url: `${SITE_URL}/projects/${project.slug}/`,
+      lastModified: await getProjectModified(project.slug),
+      changeFrequency: "yearly" as const,
+      priority: 0.6,
+    })),
+  );
 
   return [...staticRoutes, ...projectRoutes];
 }

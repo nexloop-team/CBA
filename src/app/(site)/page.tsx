@@ -12,23 +12,25 @@ import {
   getFeatured,
   getPlayableReels,
   getServiceImages,
+  getTestimonials,
 } from "@/lib/content";
 import type { Project, ProjectImage, ProjectSummary } from "@/types/project";
 
 /** Strips body + gallery so the carousel payload stays small. */
 const toSummary = ({ body: _b, images: _i, ...rest }: Project): ProjectSummary => rest;
 
-export default function HomePage() {
-  const projects = getAllProjects();
-  const featured = getFeatured();
+export default async function HomePage() {
+  const [projects, featured, reels, testimonials] = await Promise.all([
+    getAllProjects(),
+    getFeatured(),
+    getPlayableReels(),
+    getTestimonials(),
+  ]);
 
   if (projects.length === 0) {
     return (
       <section className="container-site flex min-h-svh items-center">
-        <p className="text-lead">
-          No projects yet. Add one under <code>content/projects/</code> and run{" "}
-          <code>npm run images</code>.
-        </p>
+        <p className="text-lead">No projects yet. Add one in /admin.</p>
       </section>
     );
   }
@@ -66,7 +68,9 @@ export default function HomePage() {
   // array - see getBandImage. The carousel heroes are excluded as well as the
   // allocator's set, since those are on this page too even though take() never
   // handed them out.
-  const contactImage = getBandImage(new Set([...used, ...featured.map((p) => p.heroImage.stem)]));
+  const contactImage = await getBandImage(
+    new Set([...used, ...featured.map((p) => p.heroImage.stem)]),
+  );
   if (contactImage) used.add(contactImage.stem);
 
   return (
@@ -83,10 +87,10 @@ export default function HomePage() {
         <StudioIntro images={studioImages} />
         <FeaturedWorks projects={featured.map(toSummary)} />
         <Services images={serviceImages} />
-        {/* Reels fill the "In the detail" slot. Renders nothing until content/reels.ts has entries. */}
-        <Reels reels={getPlayableReels()} />
+        {/* Reels fill the "In the detail" slot. Renders nothing without any. */}
+        <Reels reels={reels} />
         <Stats />
-        <Testimonials />
+        <Testimonials testimonials={testimonials} />
         <ContactBand image={contactImage} />
       </div>
     </>

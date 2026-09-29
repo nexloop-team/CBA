@@ -4,14 +4,14 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import IconButton from "@/components/ui/IconButton";
 import SectionIndex from "@/components/ui/SectionIndex";
-import { testimonials } from "@content/testimonials";
+import type { Testimonial } from "@content/testimonials";
 import { pad2 } from "@/lib/utils";
 import { prefersReducedMotion } from "@/lib/gsap";
 
 const INTERVAL = 7000;
 
 /** Driessen's quote slider, with the `01 | 03` counter. */
-export default function Testimonials() {
+export default function Testimonials({ testimonials }: { testimonials: Testimonial[] }) {
   const [index, setIndex] = useState(0);
   const [paused, setPaused] = useState(false);
   const total = testimonials.length;

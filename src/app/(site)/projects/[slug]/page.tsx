@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { Link } from "next-view-transitions";
-import { MDXRemote } from "next-mdx-remote/rsc";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import Figure from "@/components/ui/Figure";
 import MetaRow from "@/components/ui/MetaRow";
@@ -9,29 +8,36 @@ import Prose from "@/components/ui/Prose";
 import Chip from "@/components/ui/Chip";
 import ProjectGallery from "@/components/sections/ProjectGallery";
 import ContactBand from "@/components/sections/ContactBand";
-import { getAllProjects, getProject, getAdjacent } from "@/lib/content";
+import { getAllProjects, getProject, getAdjacent, getSite } from "@/lib/content";
+import { readManifest } from "@/lib/site-data";
 import { CATEGORY_LABELS, type Category } from "@/types/project";
 import { formatAreaLong, cn, scrimClass } from "@/lib/utils";
-import { site } from "@content/site";
 
 /** Falls back to a composed line while the summary is still a placeholder. */
-function describe(project: {
-  title: string;
-  category: Category;
-  summary: string;
-  pending: string[];
-}) {
+function describe(
+  project: {
+    title: string;
+    category: Category;
+    summary: string;
+    pending: string[];
+  },
+  siteName: string,
+) {
   return project.pending.includes("summary")
-    ? `${project.title} - ${CATEGORY_LABELS[project.category]} by ${site.name}.`
+    ? `${project.title} - ${CATEGORY_LABELS[project.category]} by ${siteName}.`
     : project.summary;
 }
 
-// Every project is prerendered; an unknown slug is a 404 rather than a
-// server render that has no content files to read.
-export const dynamicParams = false;
+/** Absolute URL of an image's JPEG; uploaded images already have absolute stems. */
+function absoluteJpeg(image: { stem: string; fallbackWidth: number }, siteUrl: string) {
+  const url = `${image.stem}-${image.fallbackWidth}.jpg`;
+  return url.startsWith("http") ? url : `${siteUrl}${url}`;
+}
 
-export function generateStaticParams() {
-  return getAllProjects().map((p) => ({ slug: p.slug }));
+// Projects that existed at build time are prerendered. One added in /admin
+// since then is rendered on its first visit and cached like the rest.
+export async function generateStaticParams() {
+  return (await getAllProjects()).map((p) => ({ slug: p.slug }));
 }
 
 export async function generateMetadata({
@@ -40,14 +46,17 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
   const { slug } = await params;
-  const project = getProject(slug);
+  const [project, site] = await Promise.all([getProject(slug), getSite()]);
   if (!project) return {};
 
-  // The generated social card, not the raw hero: it carries the title and
-  // wordmark, and is already cropped to 1200x630.
-  const description = describe(project);
+  const description = describe(project, site.name);
 
-  const image = `${site.url}/media/og/${project.slug}.jpg`;
+  // The generated social card when the build made one (it carries the title
+  // and wordmark, cropped to 1200x630); otherwise the main image.
+  const hasCard = Boolean(readManifest()[project.slug]);
+  const image = hasCard
+    ? `${site.url}/media/og/${project.slug}.jpg`
+    : absoluteJpeg(project.heroImage, site.url);
   return {
     title: project.title,
     description,
@@ -57,17 +66,21 @@ export async function generateMetadata({
       description,
       type: "article",
       url: `/projects/${project.slug}/`,
-      images: [{ url: image, width: 1200, height: 630, alt: project.title }],
+      images: hasCard
+        ? [{ url: image, width: 1200, height: 630, alt: project.title }]
+        : [{ url: image, alt: project.title }],
     },
   };
 }
 
 export default async function ProjectPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  const project = getProject(slug);
+  const [project, adjacent, site] = await Promise.all([
+    getProject(slug),
+    getAdjacent(slug),
+    getSite(),
+  ]);
   if (!project) notFound();
-
-  const adjacent = getAdjacent(slug);
 
   // Anything still on a placeholder is omitted rather than rendered as
   // "TODO" or "0 m²". See the pending-field report printed during the build.
@@ -84,10 +97,14 @@ export default async function ProjectPage({ params }: { params: Promise<{ slug: 
     ...(project.photographer ? [{ label: "Photography", value: project.photographer }] : []),
   ];
 
-  // The description body is MDX; skip it entirely while it is a stub.
-  const hasBody = project.body.trim().length > 0 && !project.body.startsWith("TODO(client)");
+  // Plain text from /admin; blank lines separate paragraphs.
+  const paragraphs = project.body
+    .split(/\n\s*\n/)
+    .map((p) => p.trim())
+    .filter(Boolean);
+  const hasBody = paragraphs.length > 0;
 
-  const description = describe(project);
+  const description = describe(project, site.name);
 
   // BreadcrumbList is what produces the Home > Projects > Name trail in search
   // results instead of a bare URL.
@@ -113,7 +130,7 @@ export default async function ProjectPage({ params }: { params: Promise<{ slug: 
     description,
     ...(project.pending.includes("year") ? {} : { dateCreated: String(project.year) }),
     locationCreated: { "@type": "Place", name: project.location },
-    image: `${site.url}${project.heroImage.stem}-1200.jpg`,
+    image: absoluteJpeg(project.heroImage, site.url),
     creator: { "@type": "Organization", name: site.name, url: site.url },
   };
 
@@ -192,7 +209,9 @@ export default async function ProjectPage({ params }: { params: Promise<{ slug: 
             {!pending("summary") && <p className="display text-display-s">{project.summary}</p>}
             {hasBody && (
               <Prose className={pending("summary") ? undefined : "mt-10"}>
-                <MDXRemote source={project.body} />
+                {paragraphs.map((p, i) => (
+                  <p key={i}>{p}</p>
+                ))}
               </Prose>
             )}
           </div>

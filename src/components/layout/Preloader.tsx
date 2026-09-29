@@ -2,7 +2,7 @@
 
 import { useRef, useState } from "react";
 import { gsap, useGSAP, EASE, prefersReducedMotion } from "@/lib/gsap";
-import { site } from "@content/site";
+import { useSite } from "@/components/layout/SiteProvider";
 
 const SEEN_KEY = "cba:preloaded";
 
@@ -20,6 +20,7 @@ const SEEN_KEY = "cba:preloaded";
  * in globals.css hides it outright.
  */
 export default function Preloader() {
+  const site = useSite();
   const root = useRef<HTMLDivElement>(null);
   const inner = useRef<HTMLDivElement>(null);
   const [done, setDone] = useState(false);

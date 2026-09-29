@@ -1,12 +1,9 @@
 import type { MetadataRoute } from "next";
-import { site } from "@content/site";
-
-/** Route handlers must opt in explicitly under `output: "export"`. */
-export const dynamic = "force-static";
+import { SITE_URL } from "@content/site";
 
 export default function robots(): MetadataRoute.Robots {
   return {
     rules: { userAgent: "*", allow: "/", disallow: "/admin/" },
-    sitemap: `${site.url}/sitemap.xml`,
+    sitemap: `${SITE_URL}/sitemap.xml`,
   };
 }

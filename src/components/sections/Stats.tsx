@@ -2,10 +2,11 @@ import Counter from "@/components/ui/Counter";
 import ContourLines from "@/components/ui/ContourLines";
 import SectionIndex from "@/components/ui/SectionIndex";
 import Reveal from "@/components/ui/Reveal";
-import { studio } from "@content/studio";
+import { getStudio } from "@/lib/content";
 
 /** Driessen's numbers band. */
-export default function Stats() {
+export default async function Stats() {
+  const studio = await getStudio();
   if (!studio.showStats || studio.stats.length === 0) return null;
 
   return (

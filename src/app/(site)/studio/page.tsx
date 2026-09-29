@@ -5,8 +5,7 @@ import SectionIndex from "@/components/ui/SectionIndex";
 import Figure from "@/components/ui/Figure";
 import ContourLines from "@/components/ui/ContourLines";
 import ContactBand from "@/components/sections/ContactBand";
-import { getAllProjects, getBandImage, getStudioPortrait } from "@/lib/content";
-import { studio } from "@content/studio";
+import { getAllProjects, getBandImage, getStudio, getStudioPortrait } from "@/lib/content";
 
 export const metadata: Metadata = {
   title: "Studio",
@@ -15,12 +14,17 @@ export const metadata: Metadata = {
   alternates: { canonical: "/studio/" },
 };
 
-export default function StudioPage() {
-  const projects = getAllProjects();
+export default async function StudioPage() {
+  const [projects, studio, portrait] = await Promise.all([
+    getAllProjects(),
+    getStudio(),
+    getStudioPortrait(),
+  ]);
 
   // The uploaded portrait when there is one (/admin -> Studio), otherwise a
   // project photograph stands in.
-  const portraitStandIn = getStudioPortrait() ?? projects[0]?.images[2] ?? projects[0]?.heroImage;
+  const portraitStandIn = portrait ?? projects[0]?.images[2] ?? projects[0]?.heroImage;
+  const bandImage = await getBandImage(new Set([portraitStandIn?.stem ?? ""]));
 
   return (
     <>
@@ -106,7 +110,7 @@ export default function StudioPage() {
         </div>
       </section>
 
-      <ContactBand image={getBandImage(new Set([portraitStandIn?.stem ?? ""]))} />
+      <ContactBand image={bandImage} />
     </>
   );
 }

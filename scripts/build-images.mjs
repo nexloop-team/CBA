@@ -318,6 +318,13 @@ async function main() {
   );
   manifest.studio = portrait ? [portrait] : [];
 
+  // Reel videos present in this build. The site checks reels against this list
+  // rather than the disk: files under public/ are not readable from the server
+  // when a page re-renders after an /admin save.
+  manifest.reelFiles = (await listDir(path.join(ROOT, "public", "reels")))
+    .filter((entry) => entry.isFile() && /\.mp4$/i.test(entry.name))
+    .map((entry) => entry.name.replace(/\.mp4$/i, ""));
+
   await mkdir(path.dirname(MANIFEST), { recursive: true });
   await writeFile(MANIFEST, JSON.stringify(manifest, null, 2) + "\n");
 
@@ -340,7 +347,9 @@ async function main() {
   const icons = await buildIcons({ root: ROOT, brand });
   warnings.push(...og.warnings, ...icons.warnings);
 
-  const total = Object.values(manifest).reduce((n, v) => n + v.filter(Boolean).length, 0);
+  const total = Object.entries(manifest)
+    .filter(([key]) => key !== "reelFiles")
+    .reduce((n, [, v]) => n + v.filter(Boolean).length, 0);
   console.log(
     `images: ${slugs.length} project(s), ${total} image(s) - ${processed} processed, ${reused} reused`,
   );

@@ -1,14 +1,14 @@
 /**
- * Every real-world detail about the practice.
+ * The practice's details, as components use them.
  *
- * The editable parts (description, contact, socials) live in
- * settings/site.json and brand.json so the /admin editor can change them.
- * Services are in settings/services.json, which the admin does not show.
- * Code-only settings (domain, nav, hero video) stay here.
+ * The editable parts (name, tagline, description, contact, socials) come from
+ * the /admin data document - see src/lib/site-data.ts. Server code gets the
+ * result from `getSite()` in src/lib/content.ts; client components from
+ * `useSite()`. The code-only settings (domain, nav, hero video, services) stay
+ * here.
  */
-import brand from "./brand.json";
-import settings from "./settings/site.json";
 import servicesData from "./settings/services.json";
+import type { SiteData } from "@/types/site-data";
 
 export interface Service {
   id: string;
@@ -18,72 +18,58 @@ export interface Service {
   image?: string;
 }
 
-const contact = settings.contact;
+// TODO(client): confirm the live domain before launch - this drives canonical
+// URLs, the sitemap and Open Graph tags.
+export const SITE_URL = "https://chetanborkarassociates.com";
 
-export const site = {
-  // Shared with scripts/build-images.mjs, which cannot import TypeScript -
-  // brand.json is the single source of truth for both.
-  name: brand.name,
-  shortName: brand.shortName,
-  tagline: brand.tagline,
-  disciplines: brand.disciplines,
-  description: settings.description,
+const NAV = [
+  { label: "Projects", href: "/projects" },
+  { label: "Studio", href: "/studio" },
+  { label: "Contact", href: "/contact" },
+];
 
-  // TODO(client): confirm the live domain before deploying - this drives
-  // canonical URLs, the sitemap and Open Graph tags.
-  url: "https://chetanborkarassociates.com",
+export function buildSite(data: SiteData) {
+  return {
+    name: data.brand.name,
+    shortName: data.brand.shortName,
+    tagline: data.brand.tagline,
+    disciplines: data.brand.disciplines,
+    description: data.description,
+    url: SITE_URL,
+    /**
+     * Hero media. With `video` null the hero uses the first featured project's
+     * photograph. Set it to a path under public/ to play a film instead.
+     */
+    hero: {
+      video: null as string | null,
+      poster: null as string | null,
+    },
+    contact: {
+      ...data.contact,
+      /** Empty hides the contact page map. */
+      mapQuery: data.contact.mapQuery || null,
+    },
+    socials: data.socials,
+    nav: NAV,
+    services: servicesData.services as Service[],
+  };
+}
 
-  /**
-   * Hero media. With `video` null the hero uses the first featured project's
-   * photograph. Set it to a path under public/ to play a film instead -
-   * landscape, muted, short and small (it is the first thing anyone downloads).
-   */
-  hero: {
-    video: null as string | null,
-    poster: null as string | null,
-  },
-
-  contact: {
-    ...contact,
-    /** Optional: appears on the contact page map. Empty hides the map. */
-    mapQuery: contact.mapQuery || null,
-  },
-
-  socials: settings.socials,
-
-  nav: [
-    { label: "Projects", href: "/projects" },
-    { label: "Studio", href: "/studio" },
-    { label: "Contact", href: "/contact" },
-  ],
-
-  /** Drives the service rows on the home page. */
-  services: servicesData.services as Service[],
-};
-
-export type SiteConfig = typeof site;
+export type Site = ReturnType<typeof buildSite>;
 
 /** Pre-filled WhatsApp click-to-chat link. */
-export const whatsappHref = `https://wa.me/${site.contact.phoneE164.replace(/[^0-9]/g, "")}?text=${encodeURIComponent(
-  site.contact.whatsappMessage,
-)}`;
+export const whatsappHref = (site: Site) =>
+  `https://wa.me/${site.contact.phoneE164.replace(/[^0-9]/g, "")}?text=${encodeURIComponent(
+    site.contact.whatsappMessage,
+  )}`;
+
+export const telHref = (site: Site) => `tel:${site.contact.phoneE164}`;
+export const mailHref = (site: Site) => `mailto:${site.contact.email}`;
 
 /**
- * True while a detail is still the placeholder shipped with the template.
- *
- * Placeholders are omitted from the page rather than rendered, which is the
- * same rule the project content already follows (see isPending in
- * src/lib/content.ts): "TODO Studio address" and "TODO City" printed in a live
- * footer are worse than no address at all, and a half-filled site.ts should not
- * be able to ship them by accident.
- *
- * The all-zeros test is a heuristic for the unfilled phone and postal code. A
- * real number with five zeros in a row would be hidden too, which is a fault
- * that announces itself immediately - unlike the failure it is guarding.
+ * True while a detail is still empty or a template placeholder, so it is
+ * omitted from the page rather than rendered.
  */
 export function isPlaceholder(value: string | null | undefined): boolean {
   return !value || /TODO/i.test(value) || /0{5,}/.test(value);
 }
-
-export const telHref = `tel:${site.contact.phoneE164}`;
-export const mailHref = `mailto:${site.contact.email}`;

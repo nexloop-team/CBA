@@ -1,8 +1,10 @@
 import { Link } from "next-view-transitions";
-import { site, mailHref, telHref, isPlaceholder } from "@content/site";
+import { mailHref, telHref, isPlaceholder } from "@content/site";
+import { getSite } from "@/lib/content";
 import InstagramIcon from "@/components/ui/InstagramIcon";
 
-export default function Footer() {
+export default async function Footer() {
+  const site = await getSite();
   const year = new Date().getFullYear();
   const { address } = site.contact;
 
@@ -67,7 +69,7 @@ export default function Footer() {
                 {showEmail && (
                   <li>
                     <a
-                      href={mailHref}
+                      href={mailHref(site)}
                       className={`${linkClass.replace("inline-block", "block")} [overflow-wrap:anywhere]`}
                     >
                       {site.contact.email.split("@")[0]}
@@ -77,7 +79,7 @@ export default function Footer() {
                 )}
                 {showPhone && (
                   <li>
-                    <a href={telHref} data-numeric className={linkClass}>
+                    <a href={telHref(site)} data-numeric className={linkClass}>
                       {site.contact.phoneDisplay}
                     </a>
                   </li>

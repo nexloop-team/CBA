@@ -5,7 +5,7 @@ import ContourLines from "@/components/ui/ContourLines";
 import RotatingFigure from "@/components/ui/RotatingFigure";
 import RevealText from "@/components/ui/RevealText";
 import SectionIndex from "@/components/ui/SectionIndex";
-import { studio } from "@content/studio";
+import { getStudio } from "@/lib/content";
 import type { ProjectImage } from "@/types/project";
 
 /**
@@ -15,7 +15,8 @@ import type { ProjectImage } from "@/types/project";
  * most of the left column empty. A smaller figure cycling through other
  * projects fills that gap and laps over the tall image's lower-left corner.
  */
-export default function StudioIntro({ images }: { images: ProjectImage[] }) {
+export default async function StudioIntro({ images }: { images: ProjectImage[] }) {
+  const studio = await getStudio();
   const [primary, ...rest] = images;
   if (!primary) return null;
 

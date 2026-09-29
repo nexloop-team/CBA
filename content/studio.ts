@@ -1,34 +1,15 @@
 /**
  * Studio page + home intro copy.
  *
- * settings/studio.json is edited through /admin. settings/studio-copy.json
- * (principles and process steps) is deliberately kept out of the admin and
- * edited by hand.
+ * Most of it is edited in /admin and lives in the data document (see
+ * src/lib/site-data.ts). The principles and process steps are deliberately
+ * kept out of the admin, in settings/studio-copy.json.
  */
-import data from "./settings/studio.json";
 import copy from "./settings/studio-copy.json";
+import type { SiteData } from "@/types/site-data";
 
-export interface Studio {
-  /** Home page intro - kept short; the full statement lives on /studio. */
-  intro: string;
-  /** Opening statement on /studio. */
-  statement: string;
-  about: string[];
-  founder: {
-    name: string;
-    title: string;
-    /** Empty hides the paragraph. */
-    bio: string;
-    /** Repo path, e.g. "/content/studio/portrait.jpg". Empty uses a project photo. */
-    portrait: string;
-  };
-  pillars: { title: string; body: string }[];
-  process: { step: string; title: string; body: string }[];
-  /** Hides the "By the numbers" section when false. */
-  showStats: boolean;
-  stats: { value: number; suffix: string; label: string }[];
-  /** e.g. a COA registration number. Empty hides it. */
-  credentials: string;
+export function buildStudio(data: SiteData) {
+  return { ...data.studio, pillars: copy.pillars, process: copy.process };
 }
 
-export const studio = { ...copy, ...data } as Studio;
+export type Studio = ReturnType<typeof buildStudio>;

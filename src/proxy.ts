@@ -5,9 +5,9 @@ import { NextResponse, type NextRequest } from "next/server";
  *
  * next.config sets `skipTrailingSlashRedirect`, so this does the `/about` ->
  * `/about/` redirect that `trailingSlash: true` would otherwise do everywhere.
- * The point is what it skips: /api/github is called by the admin editor
- * without trailing slashes, and redirecting those would send every save -
- * photo uploads included - to the server twice.
+ * The point is what it skips: /api routes are called by /admin without
+ * trailing slashes, and redirecting those would send every save to the server
+ * twice.
  */
 export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;

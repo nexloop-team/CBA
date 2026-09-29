@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Figure from "@/components/ui/Figure";
 import SectionIndex from "@/components/ui/SectionIndex";
-import { site } from "@content/site";
+import { useSite } from "@/components/layout/SiteProvider";
 import type { ProjectImage } from "@/types/project";
 import { cn, pad2 } from "@/lib/utils";
 
@@ -16,6 +16,7 @@ import { cn, pad2 } from "@/lib/utils";
  * cannot happen.
  */
 export default function Services({ images }: { images: (ProjectImage | undefined)[] }) {
+  const site = useSite();
   const [active, setActive] = useState<number | null>(null);
 
   return (

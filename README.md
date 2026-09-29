@@ -44,54 +44,30 @@ bring in the original asset drop. See **Importing a folder of originals**.
 
 ## Where the content lives
 
-Everything editable is under `content/`. Nothing in `src/` needs touching to
-add a project or change a phone number.
+Day to day, content is edited at **`/admin`** (see "Editing the site" below)
+and stored in Vercel Blob as one document, `data/site.json`, plus uploaded
+photos. `src/lib/site-data.ts` reads and writes it; `src/types/site-data.ts`
+describes its shape.
+
+The repository's `content/` folder is the starting point: until the first
+save from /admin, and whenever no Blob store is configured (e.g. a fresh
+checkout), the site is built from it.
 
 ```
 content/
-├─ brand.json         name, short name, tagline, discipline line
-├─ site.ts            email, phone, WhatsApp, address, nav, services
-├─ studio.ts          studio copy, founder, pillars, process, stats
-├─ testimonials.ts    client quotes
-└─ projects/
-   └─ nandvihar/
-      ├─ index.md     frontmatter + description
-      └─ images/      01-hero.jpg, 02.jpg, 03.jpg, ...
+├─ brand.json               name, tagline, discipline line (also used by the build scripts)
+├─ site.ts                  domain, nav, services; builds the `site` object
+├─ settings/
+│  ├─ services.json         the three "What we do" rows (code-only)
+│  ├─ studio-copy.json      principles and process steps (code-only)
+│  └─ site / studio / testimonials / reels .json   starting content for /admin
+├─ services/                images for the service rows
+└─ projects/<slug>/         starting projects: index.md + images/
 ```
 
-`content/brand.json` is shared with the build scripts, which cannot import
-TypeScript. Change the practice name or discipline line there and it updates the
-header, footer, hero, social cards and app icons together.
-
-### Adding a project
-
-1. Make a folder: `content/projects/my-project/` (the folder name is the URL).
-2. Drop images into `content/projects/my-project/images/`. Name the hero
-   `01-hero.jpg`; the rest are shown in filename order.
-3. Create `index.md`:
-
-```yaml
----
-title: "Nandvihar"
-category: "architecture"        # architecture | interior | engineering
-tags: ["residential"]
-location: "Nagpur, Maharashtra"
-area: 340                       # square metres, a number - shown as m² and sq ft
-year: 2024
-status: "completed"             # completed | ongoing
-client: "Private"
-scope: ["Architecture", "Interior", "Site Supervision"]
-featured: true                  # appears in the home page carousel
-order: 1                        # lower numbers come first
-hero: "01-hero.jpg"
-summary: "One line - used on cards and as the page description."
----
-
-The long description. Plain Markdown. Blank line between paragraphs.
-Comments must be MDX-style: {/* like this */}, not HTML comments.
-```
-
-4. Run `npm run images`, then `npm run dev`.
+Photos in `content/projects` are processed at build time (`npm run images`).
+Photos uploaded in /admin are processed when they are uploaded, into the same
+set of sizes, and stored in Blob.
 
 ### Placeholders vs errors
 
@@ -241,25 +217,33 @@ The reel videos are committed in `public/reels/` (about 330 MB; the largest is
 64 MB, under GitHub's 100 MB file limit). Any reel whose file is missing is
 left out, and "In the detail" hides itself when none are present.
 
-### Editing on the live site (/admin)
+### Editing the site (/admin)
 
-`/admin` asks for one shared password. Saving commits to GitHub through the
-site's own server (`/api/github`), and Vercel redeploys a minute or two later.
-Editors need no GitHub account.
+`/admin` asks for one shared password (`ADMIN_PASSWORD`). Editors can add,
+edit, reorder and delete projects and their photos, and change the studio text,
+contact details, quotes and reel captions. **Save changes** writes everything at
+once and the live site shows it on the next page visit - no deploy.
 
-One-off setup, in Vercel -> the project -> Settings -> Environment Variables:
+How it works:
 
-| Name | Value |
+- `/api/auth` checks the password and sets an HttpOnly session cookie that every
+  `/api/admin/*` route requires.
+- `/api/admin/data` loads and saves the content document. A save made from an
+  out-of-date copy is refused, so two editors cannot overwrite each other.
+- Photos upload straight from the browser to Blob (`/api/admin/upload` only
+  issues a token), then `/api/admin/images` makes the web sizes with sharp.
+- Pages read the document through a cache tagged `site-data`; saving
+  invalidates it.
+
+Environment (Vercel -> Settings -> Environment Variables):
+
+| Name | Set by |
 |---|---|
-| `ADMIN_PASSWORD` | the password editors will use |
-| `GITHUB_TOKEN` | a GitHub fine-grained token: github.com -> Settings -> Developer settings -> Personal access tokens -> Fine-grained -> Generate. Repository access: only `nexloop-team/CBA`. Permissions: **Contents: Read and write**. |
+| `ADMIN_PASSWORD` | you - changing it signs everyone out |
+| `BLOB_READ_WRITE_TOKEN` | Vercel, when the Blob store `cba-content` was connected |
 
-Redeploy after adding them. Changing either value signs everyone out. Every
-edit is committed as the token's owner.
-
-Photos over ~3 MB are scaled to 3600px in the browser before upload
-(`public/admin-upload.js`), because Vercel functions accept at most 4.5 MB per
-request.
+For local work, `npx vercel env pull` fetches the Blob token into
+`.env.local`; note that local saves then change the live site's content.
 
 ---
 

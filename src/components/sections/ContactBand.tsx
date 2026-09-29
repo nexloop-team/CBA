@@ -1,6 +1,7 @@
 import { PillLink } from "@/components/ui/PillButton";
 import Figure from "@/components/ui/Figure";
 import { whatsappHref } from "@content/site";
+import { getSite } from "@/lib/content";
 import { cn, bandScrimClass } from "@/lib/utils";
 import type { ProjectImage } from "@/types/project";
 
@@ -8,7 +9,8 @@ import type { ProjectImage } from "@/types/project";
  * Hitoba's image-backed contact band. Closes the home page and /studio.
  * No form, by design - a single WhatsApp call to action.
  */
-export default function ContactBand({ image }: { image?: ProjectImage }) {
+export default async function ContactBand({ image }: { image?: ProjectImage }) {
+  const site = await getSite();
   return (
     <section
       aria-labelledby="start-band-heading"
@@ -57,7 +59,7 @@ export default function ContactBand({ image }: { image?: ProjectImage }) {
         </p>
 
         <div className="mt-6">
-          <PillLink href={whatsappHref} external variant="solid" tone="dark">
+          <PillLink href={whatsappHref(site)} external variant="solid" tone="dark">
             Message on WhatsApp
           </PillLink>
         </div>

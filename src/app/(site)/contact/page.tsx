@@ -5,15 +5,20 @@ import SectionIndex from "@/components/ui/SectionIndex";
 import RevealText from "@/components/ui/RevealText";
 import ContourLines from "@/components/ui/ContourLines";
 import LazyMap from "@/components/ui/LazyMap";
-import { site, mailHref, telHref, whatsappHref } from "@content/site";
+import { mailHref, telHref, whatsappHref } from "@content/site";
+import { getSite } from "@/lib/content";
 
-export const metadata: Metadata = {
-  title: "Contact",
-  description: `Get in touch with ${site.name} - ${site.contact.address.city}.`,
-  alternates: { canonical: "/contact/" },
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const site = await getSite();
+  return {
+    title: "Contact",
+    description: `Get in touch with ${site.name} - ${site.contact.address.city}.`,
+    alternates: { canonical: "/contact/" },
+  };
+}
 
-export default function ContactPage() {
+export default async function ContactPage() {
+  const site = await getSite();
   const { address } = site.contact;
 
   // No contact form by design - these are the channels clients actually use,
@@ -24,7 +29,7 @@ export default function ContactPage() {
       icon: MessageCircle,
       label: "WhatsApp",
       value: "Message us",
-      href: whatsappHref,
+      href: whatsappHref(site),
       external: true,
       size: "text-display-m",
       numeric: false,
@@ -34,7 +39,7 @@ export default function ContactPage() {
       icon: Mail,
       label: "Email",
       value: site.contact.email,
-      href: mailHref,
+      href: mailHref(site),
       external: false,
       size: "text-display-s",
       numeric: false,
@@ -44,7 +49,7 @@ export default function ContactPage() {
       icon: Phone,
       label: "Phone",
       value: `${site.contact.phoneDisplay} / ${site.contact.phoneSecondaryDisplay}`,
-      href: telHref,
+      href: telHref(site),
       external: false,
       size: "text-display-s",
       numeric: true,

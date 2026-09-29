@@ -7,7 +7,7 @@ import SectionIndex from "@/components/ui/SectionIndex";
 import IconButton from "@/components/ui/IconButton";
 import { useReducedMotion } from "@/lib/gsap";
 import type { Reel } from "@content/reels";
-import { site } from "@content/site";
+import { useSite } from "@/components/layout/SiteProvider";
 import { cn, pad2 } from "@/lib/utils";
 
 /**
@@ -26,6 +26,7 @@ import { cn, pad2 } from "@/lib/utils";
  *    poster with a play button and waits to be asked.
  */
 export default function Reels({ reels }: { reels: Reel[] }) {
+  const site = useSite();
   const track = useRef<HTMLUListElement>(null);
   const [unmuted, setUnmuted] = useState<Set<string>>(new Set());
   const [manuallyPaused, setManuallyPaused] = useState<Set<string>>(new Set());

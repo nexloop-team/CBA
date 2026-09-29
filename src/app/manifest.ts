@@ -1,10 +1,8 @@
 import type { MetadataRoute } from "next";
-import { site } from "@content/site";
+import { getSite } from "@/lib/content";
 
-/** Route handlers must opt in explicitly under `output: "export"`. */
-export const dynamic = "force-static";
-
-export default function manifest(): MetadataRoute.Manifest {
+export default async function manifest(): Promise<MetadataRoute.Manifest> {
+  const site = await getSite();
   return {
     name: site.name,
     short_name: site.shortName,
