@@ -198,6 +198,15 @@ export const cmsConfig = {
             { label: "Home page intro", name: "intro", widget: "text" },
             { label: "Studio page statement", name: "statement", widget: "text" },
             {
+              label: "About paragraphs",
+              name: "about",
+              widget: "list",
+              // Open, so the text can be edited without expanding each one.
+              collapsed: false,
+              field: { label: "Paragraph", name: "paragraph", widget: "text" },
+              hint: "Shown on the home page and the Studio page. Drag to reorder.",
+            },
+            {
               label: "Founder",
               name: "founder",
               widget: "object",

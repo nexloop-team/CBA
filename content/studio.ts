@@ -2,8 +2,8 @@
  * Studio page + home intro copy.
  *
  * settings/studio.json is edited through /admin. settings/studio-copy.json
- * (about paragraphs, principles, process) is deliberately kept out of the
- * admin and edited by hand.
+ * (principles and process steps) is deliberately kept out of the admin and
+ * edited by hand.
  */
 import data from "./settings/studio.json";
 import copy from "./settings/studio-copy.json";
