@@ -26,6 +26,10 @@ function describe(project: {
     : project.summary;
 }
 
+// Every project is prerendered; an unknown slug is a 404 rather than a
+// server render that has no content files to read.
+export const dynamicParams = false;
+
 export function generateStaticParams() {
   return getAllProjects().map((p) => ({ slug: p.slug }));
 }

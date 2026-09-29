@@ -1,16 +1,16 @@
 /**
  * Decap CMS configuration for /admin.
  *
- * Kept in code rather than a config.yml beside the page: the page is a route
- * handler, and under `output: "export"` a public/admin/ folder would collide
- * with the file it emits.
+ * Kept in code rather than a config.yml so it can share the site's content
+ * modules and read build-time environment variables.
  *
  * Saving:
  *  - On localhost, Decap talks to `decap-server` (started by `npm run admin`),
  *    which writes straight into content/ on this machine.
- *  - On the live site it commits to GitHub instead. That needs the repo pushed
- *    to GitHub and CMS_GITHUB_REPO ("owner/name") set at build time, plus a
- *    GitHub OAuth app on the host. Until then the live /admin says so and stops.
+ *  - On the live site it commits to the GitHub repo, and Vercel redeploys.
+ *    Signing in goes through /api/auth and /api/callback, which need
+ *    GITHUB_OAUTH_CLIENT_ID and GITHUB_OAUTH_CLIENT_SECRET set on Vercel.
+ *    Without them the live /admin says so instead of showing a broken login.
  */
 import { site } from "@content/site";
 
@@ -27,12 +27,20 @@ const settingsImage = (label: string, folder: string, hint?: string) => ({
   hint,
 });
 
-export const githubRepo = process.env.CMS_GITHUB_REPO ?? "";
+/** True when the Vercel project has the GitHub OAuth app configured. */
+export const onlineEditingConfigured = Boolean(process.env.GITHUB_OAUTH_CLIENT_ID);
 
 export const cmsConfig = {
   load_config_file: false,
   local_backend: true,
-  backend: { name: "github", repo: githubRepo, branch: process.env.CMS_GITHUB_BRANCH ?? "main" },
+  backend: {
+    name: "github",
+    repo: process.env.CMS_GITHUB_REPO ?? "nexloop-team/CBA",
+    branch: process.env.CMS_GITHUB_BRANCH ?? "main",
+    // base_url is set to the page's own origin in route.ts, so the login
+    // works on the production domain and on preview deployments alike.
+    auth_endpoint: "api/auth",
+  },
   site_url: site.url,
   display_url: site.url,
   logo_url: "/brand/logo-mark-dark.png",

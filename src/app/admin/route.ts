@@ -1,4 +1,4 @@
-import { cmsConfig, githubRepo } from "./cms-config";
+import { cmsConfig, onlineEditingConfigured } from "./cms-config";
 
 /**
  * /admin - the content editor (Decap CMS).
@@ -6,9 +6,7 @@ import { cmsConfig, githubRepo } from "./cms-config";
  * A route handler rather than a page so it gets none of the site's layout,
  * smooth scrolling or animation - Decap is its own single-page app. Not linked
  * from anywhere, excluded from robots and the sitemap, and marked noindex.
- *
- * `next build` emits this as a bare `out/admin` file; scripts/finalize-export.mjs
- * moves it to out/admin/index.html so static hosts serve it as HTML.
+ * Prerendered at build time, so environment changes need a redeploy.
  */
 export const dynamic = "force-static";
 
@@ -36,14 +34,17 @@ export function GET() {
     (function () {
       var config = ${JSON.stringify(cmsConfig)};
       var local = /^(localhost|127\\.0\\.0\\.1)$/.test(location.hostname);
-      if (!local && !${JSON.stringify(Boolean(githubRepo))}) {
+      if (!local && !${JSON.stringify(onlineEditingConfigured)}) {
         document.body.innerHTML =
-          '<div class="cba-note"><h1>Editing is local only</h1>' +
-          '<p>Run <code>npm run admin</code> on the studio computer and open ' +
-          '<code>http://localhost:3000/admin</code>.</p>' +
-          '<p>Online editing needs the site on GitHub - see README.</p></div>';
+          '<div class="cba-note"><h1>Online editing is not switched on yet</h1>' +
+          '<p>Add GITHUB_OAUTH_CLIENT_ID and GITHUB_OAUTH_CLIENT_SECRET to the ' +
+          'Vercel project and redeploy - see README.</p>' +
+          '<p>Meanwhile, run <code>npm run admin</code> on the studio computer and open ' +
+          '<code>http://localhost:3000/admin</code>.</p></div>';
         return;
       }
+      // The login popup lives on whichever domain this page was opened on.
+      config.backend.base_url = location.origin;
       window.CMS.init({ config: config });
     })();
   </script>

@@ -1,9 +1,9 @@
 # Chetan Borkar Associates - website
 
-Static portfolio site for an architecture, interior and engineering practice.
-Built with Next.js in static-export mode: `npm run build` produces a plain `out/`
-folder of HTML, CSS, JS and images that can be hosted anywhere. There is no
-server, no database and no CMS.
+Portfolio site for an architecture, interior and engineering practice, built
+with Next.js and deployed on Vercel from `github.com/nexloop-team/CBA`. Every
+page is prerendered to static HTML; the only server code is the GitHub login for
+the content editor at `/admin`. Content lives in `content/` as Markdown and JSON.
 
 ---
 
@@ -18,13 +18,9 @@ npm run dev        # http://localhost:3000
 To produce the deployable site:
 
 ```bash
-npm run build      # runs `images` then `next build` -> out/
-npm start          # serves out/ locally, exactly as a host would
+npm run build      # runs `images` then `next build`
+npm start          # serves the production build locally
 ```
-
-`npm start` is the check that matters. The dev server is more forgiving than the
-static export, so anything that secretly needed a server fails in `npm start`,
-not in `npm run dev`.
 
 ---
 
@@ -33,8 +29,9 @@ not in `npm run dev`.
 | Command | What it does |
 |---|---|
 | `npm run dev` | Dev server with hot reload |
-| `npm run build` | Images + static export to `out/` |
-| `npm start` | Serve the built `out/` folder locally |
+| `npm run build` | Images + production build |
+| `npm start` | Serve the production build locally |
+| `npm run admin` | Content editor at http://localhost:3000/admin, saving to this computer |
 | `npm run images` | Regenerate image derivatives, social cards and icons |
 | `npm run images -- --force` | Clear `public/media` and rebuild everything |
 | `npm run ingest` | Convert an Instagram export into draft projects |
@@ -236,15 +233,30 @@ that renders blank wherever the font is missing.
 
 ## Deploying
 
-Build, then publish `out/`. Nothing else is needed.
+Vercel builds and deploys every push to `main` with `npm run build`. Image
+derivatives are kept in Vercel's build cache (`.next/cache/cba-images`), so only
+new or changed photos are encoded; the very first build encodes all of them.
 
-| Host | Build command | Publish directory |
-|---|---|---|
-| Vercel / Netlify / Cloudflare Pages | `npm run build` | `out` |
-| Any static host / S3 | `npm run build` | upload `out/` |
+The reel videos in `public/reels/` are not in git (they are large), so the
+"In the detail" section hides itself on a deploy that does not have them.
 
-For GitHub Pages, add an empty `.nojekyll` to `out/` after building, or
-underscore-prefixed folders like `_next/` are stripped.
+### Editing on the live site (/admin)
+
+Saving on the live site commits to GitHub, and Vercel redeploys a minute or two
+later. Signing in needs a GitHub OAuth app, set up once:
+
+1. GitHub -> Settings -> Developer settings -> OAuth Apps -> **New OAuth App**
+   (or under the `nexloop-team` organisation's settings).
+   - Homepage URL: the site's address, e.g. `https://cba-xxxx.vercel.app`
+   - Authorization callback URL: the same address + `/api/callback/`
+2. Generate a client secret.
+3. Vercel -> the project -> Settings -> Environment Variables: add
+   `GITHUB_OAUTH_CLIENT_ID` and `GITHUB_OAUTH_CLIENT_SECRET`, then redeploy.
+4. Anyone editing needs a GitHub account with write access to the repo. If the
+   organisation restricts third-party apps, an owner must approve the OAuth app
+   (Organisation settings -> Third-party access).
+
+When the domain changes, update both URLs in the OAuth app.
 
 ---
 

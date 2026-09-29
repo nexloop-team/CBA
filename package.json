@@ -4,9 +4,9 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "npm run images && next build && node scripts/finalize-export.mjs",
-    "build:only": "next build && node scripts/finalize-export.mjs",
-    "start": "npx serve out",
+    "build": "npm run images && next build",
+    "build:only": "next build",
+    "start": "next start",
     "lint": "eslint",
     "typecheck": "tsc --noEmit",
     "format": "prettier --write .",

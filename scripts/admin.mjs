@@ -8,7 +8,8 @@
  *    reordered photos show up on the dev site without a restart
  *  - next dev, unless one is already running on port 3000
  *
- * Publishing is still `npm run build` and deploying out/.
+ * Saved changes go live when they are committed and pushed to GitHub (Vercel
+ * redeploys on every push). Editing on the live site's /admin commits for you.
  */
 import { spawn } from "node:child_process";
 import { watch } from "node:fs";
