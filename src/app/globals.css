@@ -1,26 +1,409 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+/* ---------------------------------------------------------------------------
+   Design tokens - the single source of truth for the whole site.
+   Archidomo supplies type + motion, Driessen structure, Hitoba metadata.
+   Keeping all three on one token set is what makes the blend read as authored.
+--------------------------------------------------------------------------- */
+@theme {
+  /* Colour - sampled from the practice logo, which is navy and white. */
+  --color-ink: #1a2333;
+  --color-bone: #f4f3f0;
+  --color-stone: #98a0ae;
+  /* The one invented value: a mid tone from the same navy family, used
+     sparingly for counters, active states and rules. */
+  --color-accent: #3e5a86;
+  --color-line: rgb(26 35 51 / 0.14);
+  --color-line-inverse: rgb(244 243 240 / 0.18);
+
+  /* Type families (wired up in src/lib/fonts.ts) */
+  --font-display: var(--font-display-src), ui-sans-serif, system-ui, sans-serif;
+  --font-body: var(--font-body-src), ui-sans-serif, system-ui, sans-serif;
+
+  /* Fluid type scale, 390px -> 2560px */
+  --text-display-xl: clamp(2.5rem, 5.4vw, 5.5rem);
+  --text-display-l: clamp(2rem, 4vw, 3.5rem);
+  --text-display-m: clamp(1.625rem, 2.8vw, 2.5rem);
+  --text-display-s: clamp(1.25rem, 1.7vw, 1.625rem);
+  --text-lead: clamp(1.0625rem, 1.35vw, 1.375rem);
+  --text-label: 0.6875rem;
+
+  /* Layout */
+  --container-site: 1680px;
+
+  /* Motion */
+  --ease-out-soft: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-curtain: cubic-bezier(0.87, 0, 0.13, 1);
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
+/* --------------------------------------------------------------------------
+   Base
+-------------------------------------------------------------------------- */
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+    scroll-behavior: auto; /* Lenis owns scrolling */
+  }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+  body {
+    background-color: var(--color-bone);
+    color: var(--color-ink);
+    font-family: var(--font-body);
+    font-synthesis-weight: none;
+    -webkit-font-smoothing: antialiased;
+    /* `clip`, not `hidden`: overflow-x:hidden makes body a scroll container,
+       which breaks position:sticky and ScrollTrigger's pinning (the image rail).
+       `clip` crops the same way without creating one. */
+    overflow-x: clip;
+  }
+
+  /*
+   * Android Chrome paints a grey flash behind every tapped link. The site has
+   * its own hover and active treatments, so the flash only ever reads as a
+   * rendering fault. Removing it is safe here because :focus-visible below
+   * still draws a real ring for keyboard and switch-control users - this is
+   * not the "outline: none" mistake.
+   */
+  a,
+  button,
+  summary,
+  [role="button"] {
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /*
+   * Controls that exist to be tapped get a real target. 44px is the iOS
+   * minimum and 48dp the Android one; 2.75rem clears the first and rounds to
+   * the second at the default root size.
+   */
+  @media (pointer: coarse) {
+    [data-tap] {
+      min-height: 2.75rem;
+      min-width: 2.75rem;
+    }
+
+    /*
+     * The desktop nav only appears from md up, but that includes tablets,
+     * where an 11px label with 4px of padding is a 19px target. These cannot
+     * simply be padded: the active-state rule is positioned against the link
+     * box, so growing the box would drag the rule away from the text. A
+     * transparent overlay extends the touch area instead and leaves the
+     * layout exactly as it is.
+     */
+    [data-nav-item]::after {
+      content: "";
+      position: absolute;
+      inset: -0.875rem -0.5rem;
+    }
+  }
+
+  ::selection {
+    background-color: var(--color-ink);
+    color: var(--color-bone);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 3px;
+    border-radius: 2px;
+  }
+
+  /* Metadata, counters and areas are compared column-wise - keep them aligned */
+  .tnum,
+  time,
+  [data-numeric] {
+    font-variant-numeric: tabular-nums;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+/* --------------------------------------------------------------------------
+   Utilities
+-------------------------------------------------------------------------- */
+@utility container-site {
+  width: 100%;
+  max-width: var(--container-site);
+  margin-inline: auto;
+  /* env() so content clears the notch when an iPhone is held in landscape, and
+     the rounded corners of an installed window - the manifest asks for
+     display: standalone, so there is no browser chrome to do it for us. max()
+     leaves the normal gutter untouched everywhere else. */
+  padding-inline: max(1.5rem, env(safe-area-inset-left)) max(1.5rem, env(safe-area-inset-right));
+
+  @media (width >= 48rem) {
+    padding-inline: max(2.5rem, env(safe-area-inset-left)) max(2.5rem, env(safe-area-inset-right));
+  }
+}
+
+/**
+ * Full-bleed horizontal rail whose first item lines up with the page container
+ * while the rail itself still bleeds off the right edge.
+ *
+ * scroll-padding-inline-start must match the padding, or scroll-snap aligns
+ * items to the raw scrollport edge and the first card is clipped.
+ */
+@utility rail-inset {
+  --rail-gutter: max(1.5rem, env(safe-area-inset-left));
+  padding-inline-start: max(
+    var(--rail-gutter),
+    calc((100% - var(--container-site)) / 2 + var(--rail-gutter))
+  );
+  padding-inline-end: var(--rail-gutter);
+  scroll-padding-inline-start: max(
+    var(--rail-gutter),
+    calc((100% - var(--container-site)) / 2 + var(--rail-gutter))
+  );
+
+  @media (width >= 48rem) {
+    --rail-gutter: max(2.5rem, env(safe-area-inset-left));
+  }
+}
+
+/* Archidomo's wide-tracked section labels: "N o t r e   a g e n c e" */
+@utility label {
+  font-family: var(--font-display);
+  font-size: var(--text-label);
+  font-weight: 500;
+  line-height: 1;
+  text-transform: uppercase;
+  letter-spacing: 0.35em;
+}
+
+@utility display {
+  font-family: var(--font-display);
+  font-weight: 500;
+  line-height: 1;
+  letter-spacing: -0.02em;
+}
+
+/**
+ * Hover underline that wipes in from the left. Used on every text link that is
+ * not already a button.
+ */
+@utility link-wipe {
+  background-image: linear-gradient(currentColor, currentColor);
+  background-repeat: no-repeat;
+  background-position: left bottom;
+  background-size: 0% 1px;
+  padding-bottom: 0.125rem;
+  transition: background-size 500ms var(--ease-out-soft);
+
+  .group:hover &,
+  a:hover > &,
+  &:hover {
+    background-size: 100% 1px;
+  }
+}
+
+/* Wraps a line so SplitText chars can translate in from beneath it */
+@utility mask-line {
+  display: block;
+  overflow: hidden;
+  padding-bottom: 0.12em;
+  margin-bottom: -0.12em;
+}
+
+/* --------------------------------------------------------------------------
+   Long-form MDX body copy.
+
+   These were arbitrary variants on the `display` utility, which Tailwind
+   silently dropped - project descriptions rendered their headings and pull
+   quotes in the body face with no styling at all.
+-------------------------------------------------------------------------- */
+.prose-content h2 {
+  font-family: var(--font-display);
+  font-weight: 500;
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+  font-size: var(--text-display-s);
+  color: var(--color-ink);
+  margin-top: 3.5rem;
+}
+
+.prose-content h3 {
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: 1.125rem;
+  color: var(--color-ink);
+  margin-top: 2.5rem;
+}
+
+.prose-content strong {
+  font-weight: 500;
+  color: var(--color-ink);
+}
+
+.prose-content a {
+  border-bottom: 1px solid color-mix(in srgb, var(--color-accent) 45%, transparent);
+  transition: border-color 200ms;
+}
+
+.prose-content a:hover {
+  border-bottom-color: var(--color-accent);
+}
+
+.prose-content blockquote {
+  font-family: var(--font-display);
+  font-weight: 500;
+  line-height: 1.25;
+  letter-spacing: -0.02em;
+  font-size: var(--text-display-s);
+  color: var(--color-ink);
+  border-left: 1px solid var(--color-accent);
+  padding-left: 1.5rem;
+}
+
+.prose-content ul,
+.prose-content ol {
+  padding-left: 1.25rem;
+  list-style: disc;
+}
+
+.prose-content ol {
+  list-style: decimal;
+}
+
+/* --------------------------------------------------------------------------
+   Phones in landscape.
+
+   A hero is sized to the viewport, and in landscape that viewport is about
+   340px tall. pt-32/pb-16 plus a display headline does not fit in it, and the
+   hero clips its own content rather than scrolling, so the padding comes down
+   to something the space can actually hold.
+-------------------------------------------------------------------------- */
+@media (orientation: landscape) and (max-height: 600px) {
+  [data-hero] [data-hero-content] {
+    padding-top: 5rem;
+    padding-bottom: 1.75rem;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   Header colourway.
+
+   On most routes the header sits over the page background, where ink type and
+   the ink lockup are right. On the home page and on a project page it sits over
+   a full-bleed photograph, and ink on a photograph disappears - which is what
+   made the nav unreadable over the hero.
+
+   :has() rather than a class set from an effect, so the correct colourway is
+   in the very first paint instead of appearing a frame late on every load.
+-------------------------------------------------------------------------- */
+body:has([data-hero]) header[data-transparent] {
+  color: var(--color-bone);
+}
+
+/*
+ * The lockup is ink artwork on transparency. brightness(0) flattens it to
+ * black and invert(1) takes that to white, both preserving the alpha channel.
+ * One file serves both colourways, so the header does not download a second
+ * PNG it will only ever show for the first screen.
+ */
+body:has([data-hero]) header[data-transparent] [data-logo] {
+  filter: brightness(0) invert(1);
+}
+
+body:has([data-hero]) header[data-transparent] [data-hairline] {
+  border-color: var(--color-line-inverse);
+}
+
+/*
+ * The top of a hero is as likely to be blown-out sky as dark, and these are
+ * dusk renders - half of them hit pure white somewhere in the header band.
+ * Measured against every hero on the site, pale type needs about 0.7 of ink
+ * behind it to clear 4.5:1 on the brightest pixel, so the gradient holds near
+ * that across the bar and only then dissolves. A gentler wash looked better and
+ * left the nav unreadable, which is the bug this is here to fix.
+ *
+ * It is on the header rather than inside the hero so it disappears with the
+ * transparent state, rather than having to be undone once the bone bar arrives.
+ */
+body:has([data-hero]) header[data-transparent]::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 -6rem 0;
+  z-index: -1;
+  pointer-events: none;
+  background: linear-gradient(
+    to bottom,
+    rgb(26 35 51 / 0.76) 0,
+    rgb(26 35 51 / 0.7) 5rem,
+    rgb(26 35 51 / 0) 100%
+  );
+}
+
+/*
+ * The nav rests at 60% opacity, which is right on the page background and far
+ * too little over a photograph - bone at 0.6 over a blown highlight would need
+ * a 0.87 scrim to clear 4.5:1, i.e. an opaque bar. Bringing the resting opacity
+ * up to 0.9 is what lets the gradient above stay a gradient. The active item is
+ * still marked by its accent rule.
+ */
+body:has([data-hero]) header[data-transparent] [data-nav-item] {
+  opacity: 0.9;
+}
+
+body:has([data-hero]) header[data-transparent] [data-nav-item]:hover,
+body:has([data-hero]) header[data-transparent] [data-nav-item][aria-current] {
+  opacity: 1;
+}
+
+/* --------------------------------------------------------------------------
+   Reduced motion - this design carries a lot of movement, so the
+   non-animated path has to be a first-class, fully readable state.
+   Every reveal primitive also checks this in JS (see src/lib/gsap.ts).
+-------------------------------------------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+  /* A section sliding over a pinned hero is a large parallax movement, so the
+     hero scrolls normally instead. */
+  [data-hero] {
+    position: relative;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Without JS the preloader would never be dismissed, so hide it entirely. */
+@media (scripting: none) {
+  [data-preloader] {
+    display: none !important;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   View transitions.
+
+   Project cards and the project hero share a `view-transition-name` keyed by
+   slug (set in ProjectCard and projects/[slug]), so navigating between them
+   morphs the image rather than cross-fading the page. Without these rules the
+   library only produces the browser default fade, which is barely perceptible.
+-------------------------------------------------------------------------- */
+@media not (prefers-reduced-motion: reduce) {
+  ::view-transition-group(*) {
+    animation-duration: 620ms;
+    animation-timing-function: var(--ease-out-soft);
+  }
+
+  /* The page cross-fade is deliberately quicker than the morph, so the shared
+     image stays the focus of the transition. */
+  ::view-transition-old(root),
+  ::view-transition-new(root) {
+    animation-duration: 320ms;
+    animation-timing-function: ease;
+  }
+}
+
+/* A morph is a large, unavoidable movement - opt out entirely. */
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation: none !important;
+  }
 }

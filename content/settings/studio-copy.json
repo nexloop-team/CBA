@@ -1,0 +1,52 @@
+{
+  "about": [
+    "Chetan Borkar Associates works on homes, workplaces and retail across Maharashtra. Projects range from a fifty-square-metre apartment refit to buildings of well over a thousand.",
+    "We take work from first sketch through to handover. Drawings are produced to be built from, not to be admired, and we stay on site while they are."
+  ],
+  "pillars": [
+    {
+      "title": "Decide early",
+      "body": "Orientation, massing and light are settled before anything is styled. They are the decisions that cannot be bought back later."
+    },
+    {
+      "title": "Short material palettes",
+      "body": "Few materials, used honestly and detailed properly, age better than many materials used briefly."
+    },
+    {
+      "title": "Draw what gets built",
+      "body": "We supervise our own drawings on site, so the detail that was designed is the detail that gets executed."
+    }
+  ],
+  "process": [
+    {
+      "step": "01",
+      "title": "Enquiry",
+      "body": "Site visit, brief, budget and programme - established honestly up front."
+    },
+    {
+      "step": "02",
+      "title": "Concept",
+      "body": "Site study, massing and a plan that answers the brief rather than decorating it."
+    },
+    {
+      "step": "03",
+      "title": "Design development",
+      "body": "Materials, services, joinery and lighting resolved together, not in sequence."
+    },
+    {
+      "step": "04",
+      "title": "Approvals",
+      "body": "Statutory drawings, sanctions and coordination with structural and MEP consultants."
+    },
+    {
+      "step": "05",
+      "title": "Construction",
+      "body": "Tender, contractor selection and a working drawing set built to be built from."
+    },
+    {
+      "step": "06",
+      "title": "Handover",
+      "body": "Site supervision through completion, snagging and final handover."
+    }
+  ]
+}

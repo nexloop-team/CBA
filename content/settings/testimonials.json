@@ -1,0 +1,23 @@
+{
+  "show": true,
+  "items": [
+    {
+      "quote": "They spent longer understanding how we actually live than drawing. The plan that came back solved things we had not thought to ask for.",
+      "author": "Client",
+      "role": "Private residence",
+      "company": "Nagpur"
+    },
+    {
+      "quote": "The site work was the part we were dreading. Having the same team that drew it also supervise it meant nothing got lost in translation.",
+      "author": "Client",
+      "role": "Workplace fit-out",
+      "company": "Nagpur"
+    },
+    {
+      "quote": "Budget and programme were both tight. We were told what was possible within them, honestly, at the start rather than halfway through.",
+      "author": "Client",
+      "role": "Retail showroom",
+      "company": "Nagpur"
+    }
+  ]
+}

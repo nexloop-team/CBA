@@ -1,0 +1,22 @@
+{
+  "services": [
+    {
+      "id": "architecture",
+      "title": "Architecture",
+      "summary": "Ground-up design from site study and massing through drawings, approvals and detailing.",
+      "image": "/content/services/architecture.jpg"
+    },
+    {
+      "id": "interior",
+      "title": "Interior",
+      "summary": "Spatial planning, joinery, material palettes and lighting worked out to the last millimetre.",
+      "image": "/content/services/interior.jpg"
+    },
+    {
+      "id": "engineering",
+      "title": "Engineering",
+      "summary": "Structural and services coordination, and supervision on site, so the thing that gets built is the thing that was drawn.",
+      "image": "/content/services/engineering.jpg"
+    }
+  ]
+}

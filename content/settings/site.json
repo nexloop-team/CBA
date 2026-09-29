@@ -1,0 +1,23 @@
+{
+  "description": "Chetan Borkar Associates is an architecture, interior and engineering practice designing considered spaces for homes and workplaces across Maharashtra.",
+  "contact": {
+    "email": "associates.chetanborkar@gmail.com",
+    "phoneE164": "+919657953538",
+    "phoneDisplay": "+91 96579 53538",
+    "phoneSecondaryDisplay": "+91 99609 53538",
+    "whatsappMessage": "Hi, I'd like to discuss a project.",
+    "address": {
+      "line1": "Shop 90, Balaji Arcade, District Court Road",
+      "city": "Rajgurunagar",
+      "state": "Maharashtra",
+      "postalCode": "410505",
+      "country": "IN"
+    },
+    "hours": "Mon - Sat, 10:00 - 18:00 (Sunday closed)",
+    "mapQuery": ""
+  },
+  "socials": {
+    "instagram": "https://www.instagram.com/chetan_borkar_associates/",
+    "instagramHandle": "@chetan_borkar_associates"
+  }
+}

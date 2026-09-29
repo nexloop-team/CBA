@@ -39,3 +39,26 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# --- project ---
+# Raw Instagram "Download Your Information" export (large, personal, not source)
+/instagram-export
+# Ingest output awaiting curation
+/content/_drafts
+# Generated image derivatives — rebuilt by `npm run images` on every deploy
+/public/media
+/.generated
+/public/icons
+/public/reels/*
+!/public/reels/README.md
+
+# Raw client image drops (originals; processed copies live in content/projects)
+/AVANTIKA*
+/MUKTAI*
+/JAGTAP*
+/SAIKRUPA
+/SM RESIDENCE
+/MEDANKAR*
+/logo
+# Original reel footage and Drive zips (converted copies go to public/reels)
+/video

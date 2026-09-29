@@ -1,0 +1,7 @@
+out
+.next
+node_modules
+public/media
+instagram-export
+content/_drafts
+package-lock.json

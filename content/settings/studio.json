@@ -1,0 +1,34 @@
+{
+  "intro": "We are a small practice working across architecture, interiors and engineering. Keeping all three under one roof means the drawing and the building stay the same thing.",
+  "statement": "Good space is not decoration. It is orientation, light, air and proportion - decided early, when they are still free to decide.",
+  "founder": {
+    "name": "Chetan Borkar",
+    "title": "Principal Architect",
+    "bio": "",
+    "portrait": ""
+  },
+  "credentials": "",
+  "showStats": true,
+  "stats": [
+    {
+      "value": 12,
+      "suffix": "+",
+      "label": "Years in practice"
+    },
+    {
+      "value": 85,
+      "suffix": "+",
+      "label": "Projects delivered"
+    },
+    {
+      "value": 450000,
+      "suffix": "",
+      "label": "Sq ft built"
+    },
+    {
+      "value": 6,
+      "suffix": "",
+      "label": "Cities"
+    }
+  ]
+}
