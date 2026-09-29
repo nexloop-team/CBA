@@ -237,8 +237,9 @@ Vercel builds and deploys every push to `main` with `npm run build`. Image
 derivatives are kept in Vercel's build cache (`.next/cache/cba-images`), so only
 new or changed photos are encoded; the very first build encodes all of them.
 
-The reel videos in `public/reels/` are not in git (they are large), so the
-"In the detail" section hides itself on a deploy that does not have them.
+The reel videos are committed in `public/reels/` (about 330 MB; the largest is
+64 MB, under GitHub's 100 MB file limit). Any reel whose file is missing is
+left out, and "In the detail" hides itself when none are present.
 
 ### Editing on the live site (/admin)
 
