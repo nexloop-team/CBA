@@ -123,7 +123,10 @@ export default function Hero({ image }: { image: ProjectImage }) {
         data-hero-content
         className="container-site relative pt-32 pb-16 will-change-transform md:pb-20"
       >
-        <p className="label text-bone/65 leading-relaxed tracking-[0.2em] md:leading-none md:tracking-[0.35em]">
+        <p
+          className="label text-bone/65 leading-relaxed tracking-[0.2em] md:leading-none md:tracking-[0.35em]"
+          data-edit="brand.disciplines"
+        >
           {site.disciplines}
         </p>
 
@@ -132,12 +135,18 @@ export default function Hero({ image }: { image: ProjectImage }) {
           mode="chars"
           className="display text-display-xl mt-6 max-w-[20ch]"
           start="top 95%"
+          edit="brand.tagline"
         >
           {site.tagline}
         </RevealText>
 
         <div className="mt-10 flex flex-wrap items-end justify-between gap-8">
-          <RevealText className="text-lead text-bone/80 max-w-md" delay={0.35} start="top 95%">
+          <RevealText
+            className="text-lead text-bone/80 max-w-md"
+            delay={0.35}
+            start="top 95%"
+            edit="description"
+          >
             {site.description}
           </RevealText>
 

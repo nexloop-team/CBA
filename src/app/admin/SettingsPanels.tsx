@@ -3,6 +3,7 @@
 import { Plus } from "lucide-react";
 import type { SiteData } from "@/types/site-data";
 import { SingleImageField } from "./ImageFields";
+import { usePreviewFocus } from "./Preview";
 import {
   Button,
   Card,
@@ -19,6 +20,7 @@ type Update = (change: (data: SiteData) => SiteData) => void;
 
 /** Studio page and the home page's studio intro. */
 export function StudioPanel({ data, update }: { data: SiteData; update: Update }) {
+  const focus = usePreviewFocus();
   const studio = data.studio;
   const set = (patch: Partial<SiteData["studio"]>) =>
     update((d) => ({ ...d, studio: { ...d.studio, ...patch } }));
@@ -30,10 +32,18 @@ export function StudioPanel({ data, update }: { data: SiteData; update: Update }
   return (
     <div className="space-y-5">
       <Card title="Text">
-        <Field label="Home page intro" hint="The large paragraph under the hero on the home page.">
+        <Field
+          preview="studio.intro"
+          label="Home page intro"
+          hint="The large paragraph under the hero on the home page."
+        >
           <TextArea rows={3} value={studio.intro} onChange={(intro) => set({ intro })} />
         </Field>
-        <Field label="Studio page statement" hint="The large opening line on the Studio page.">
+        <Field
+          preview="studio.statement"
+          label="Studio page statement"
+          hint="The large opening line on the Studio page."
+        >
           <TextArea
             rows={3}
             value={studio.statement}
@@ -44,7 +54,11 @@ export function StudioPanel({ data, update }: { data: SiteData; update: Update }
 
       <Card title="About paragraphs" hint="Shown on the home page and the Studio page.">
         {studio.about.map((paragraph, i) => (
-          <div key={i} className="flex items-start gap-2">
+          <div
+            key={i}
+            className="flex items-start gap-2"
+            onFocus={() => focus(`studio.about.${i}`)}
+          >
             <div className="flex-1">
               <TextArea
                 rows={3}
@@ -69,14 +83,14 @@ export function StudioPanel({ data, update }: { data: SiteData; update: Update }
 
       <Card title="Founder">
         <div className="grid gap-5 sm:grid-cols-2">
-          <Field label="Name">
+          <Field preview="studio.founder.name" label="Name">
             <TextInput value={studio.founder.name} onChange={(name) => setFounder({ name })} />
           </Field>
-          <Field label="Title">
+          <Field preview="studio.founder.title" label="Title">
             <TextInput value={studio.founder.title} onChange={(title) => setFounder({ title })} />
           </Field>
         </div>
-        <Field label="Biography" hint="Empty hides it.">
+        <Field preview="studio.founder.bio" label="Biography" hint="Empty hides it.">
           <TextArea rows={5} value={studio.founder.bio} onChange={(bio) => setFounder({ bio })} />
         </Field>
         <Field label="Portrait" hint="Without one, a project photograph is shown.">
@@ -87,7 +101,11 @@ export function StudioPanel({ data, update }: { data: SiteData; update: Update }
             alt={studio.founder.name}
           />
         </Field>
-        <Field label="Credentials" hint="e.g. COA registration number. Empty hides it.">
+        <Field
+          preview="studio.credentials"
+          label="Credentials"
+          hint="e.g. COA registration number. Empty hides it."
+        >
           <TextInput value={studio.credentials} onChange={(credentials) => set({ credentials })} />
         </Field>
       </Card>
@@ -99,7 +117,11 @@ export function StudioPanel({ data, update }: { data: SiteData; update: Update }
           label="Show this section on the home page"
         />
         {studio.stats.map((stat, i) => (
-          <div key={i} className="flex items-end gap-2">
+          <div
+            key={i}
+            className="flex items-end gap-2"
+            onFocus={() => focus(`studio.stats.${i}.label`)}
+          >
             <div className="grid flex-1 grid-cols-[1fr_5rem] gap-2 sm:grid-cols-[8rem_5rem_1fr]">
               <Field label="Number">
                 <NumberInput
@@ -163,11 +185,15 @@ export function ContactPanel({ data, update }: { data: SiteData; update: Update 
   return (
     <div className="space-y-5">
       <Card title="Contact">
-        <Field label="Email">
+        <Field preview="contact.email" label="Email">
           <TextInput type="email" value={c.email} onChange={(email) => setContact({ email })} />
         </Field>
         <div className="grid gap-5 sm:grid-cols-2">
-          <Field label="Phone (as shown)" hint="e.g. +91 96579 53538">
+          <Field
+            preview={["contact.phones", "contact.phoneDisplay"]}
+            label="Phone (as shown)"
+            hint="e.g. +91 96579 53538"
+          >
             <TextInput
               value={c.phoneDisplay}
               onChange={(phoneDisplay) => setContact({ phoneDisplay })}
@@ -179,7 +205,7 @@ export function ContactPanel({ data, update }: { data: SiteData; update: Update 
           >
             <TextInput value={c.phoneE164} onChange={(phoneE164) => setContact({ phoneE164 })} />
           </Field>
-          <Field label="Second phone (as shown)" hint="Optional.">
+          <Field preview="contact.phones" label="Second phone (as shown)" hint="Optional.">
             <TextInput
               value={c.phoneSecondaryDisplay}
               onChange={(phoneSecondaryDisplay) => setContact({ phoneSecondaryDisplay })}
@@ -192,23 +218,23 @@ export function ContactPanel({ data, update }: { data: SiteData; update: Update 
             />
           </Field>
         </div>
-        <Field label="Opening hours">
+        <Field preview="contact.hours" label="Opening hours">
           <TextInput value={c.hours} onChange={(hours) => setContact({ hours })} />
         </Field>
       </Card>
 
       <Card title="Studio address">
-        <Field label="Street">
+        <Field preview="contact.address.line1" label="Street">
           <TextInput value={c.address.line1} onChange={(line1) => setAddress({ line1 })} />
         </Field>
         <div className="grid gap-5 sm:grid-cols-3">
-          <Field label="City">
+          <Field preview="contact.cityLine" label="City">
             <TextInput value={c.address.city} onChange={(city) => setAddress({ city })} />
           </Field>
-          <Field label="State">
+          <Field preview="contact.cityLine" label="State">
             <TextInput value={c.address.state} onChange={(state) => setAddress({ state })} />
           </Field>
-          <Field label="PIN code">
+          <Field preview="contact.cityLine" label="PIN code">
             <TextInput
               value={c.address.postalCode}
               onChange={(postalCode) => setAddress({ postalCode })}
@@ -249,17 +275,25 @@ export function ContactPanel({ data, update }: { data: SiteData; update: Update 
           <Field label="Practice name">
             <TextInput value={data.brand.name} onChange={(name) => setBrand({ name })} />
           </Field>
-          <Field label="Tagline">
+          <Field preview="brand.tagline" label="Tagline">
             <TextInput value={data.brand.tagline} onChange={(tagline) => setBrand({ tagline })} />
           </Field>
         </div>
-        <Field label="Disciplines line" hint="Shown above the home page headline.">
+        <Field
+          preview="brand.disciplines"
+          label="Disciplines line"
+          hint="Shown above the home page headline."
+        >
           <TextInput
             value={data.brand.disciplines}
             onChange={(disciplines) => setBrand({ disciplines })}
           />
         </Field>
-        <Field label="Site description" hint="Used by Google and link previews.">
+        <Field
+          preview="description"
+          label="Site description"
+          hint="Used by Google and link previews."
+        >
           <TextArea
             rows={3}
             value={data.description}
@@ -273,6 +307,7 @@ export function ContactPanel({ data, update }: { data: SiteData; update: Update 
 
 /** Client quotes and reels on the home page. */
 export function HomePanel({ data, update }: { data: SiteData; update: Update }) {
+  const focus = usePreviewFocus();
   const t = data.testimonials;
   const r = data.reels;
   const setT = (patch: Partial<SiteData["testimonials"]>) =>
@@ -289,7 +324,11 @@ export function HomePanel({ data, update }: { data: SiteData; update: Update }) 
           label="Show client quotes on the home page"
         />
         {t.items.map((item, i) => (
-          <div key={i} className="rounded-lg border border-slate-200 p-4">
+          <div
+            key={i}
+            className="rounded-lg border border-slate-200 p-4"
+            onFocus={() => focus(`testimonials.items.${i}.quote`)}
+          >
             <div className="flex items-start gap-2">
               <div className="flex-1 space-y-3">
                 <Field label="Quote">
@@ -359,6 +398,7 @@ export function HomePanel({ data, update }: { data: SiteData; update: Update }) 
           <div
             key={reel.name + i}
             className="flex items-start gap-3 rounded-lg border border-slate-200 p-3"
+            onFocus={() => focus(`reels.items.${i}.caption`)}
           >
             <img
               src={`/reels/${reel.name}.jpg`}

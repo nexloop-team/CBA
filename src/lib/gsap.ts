@@ -26,12 +26,25 @@ export const DUR = {
 } as const;
 
 /**
+ * True inside the /admin live preview frame. The preview needs every text
+ * visible and unsplit so the editor can find and update it, so the site then
+ * behaves exactly as it does under reduced motion.
+ */
+function inPreviewFrame(): boolean {
+  try {
+    return window.self !== window.top;
+  } catch {
+    return true;
+  }
+}
+
+/**
  * Single source of truth for the reduced-motion decision. Every animated
  * component checks this and renders its finished state instead of animating.
  */
 export function prefersReducedMotion(): boolean {
   if (typeof window === "undefined") return false;
-  return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  return inPreviewFrame() || window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 }
 
 const REDUCED_QUERY = "(prefers-reduced-motion: reduce)";
@@ -53,7 +66,7 @@ function subscribeReducedMotion(onChange: () => void) {
 export function useReducedMotion(): boolean {
   return useSyncExternalStore(
     subscribeReducedMotion,
-    () => window.matchMedia(REDUCED_QUERY).matches,
+    () => inPreviewFrame() || window.matchMedia(REDUCED_QUERY).matches,
     () => false,
   );
 }

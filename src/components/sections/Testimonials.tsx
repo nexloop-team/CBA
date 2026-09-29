@@ -68,16 +68,16 @@ export default function Testimonials({ testimonials }: { testimonials: Testimoni
                   key={t.quote.slice(0, 24)}
                   className="display text-display-s max-w-3xl leading-snug"
                 >
-                  <p>{t.quote}</p>
+                  <p data-edit={`testimonials.items.${index}.quote`}>{t.quote}</p>
                   <footer className="label text-ink/45 mt-8">
                     <cite className="not-italic">
-                      {t.author}
+                      <span data-edit={`testimonials.items.${index}.author`}>{t.author}</span>
                       <span className="mx-2 opacity-40">·</span>
-                      {t.role}
+                      <span data-edit={`testimonials.items.${index}.role`}>{t.role}</span>
                       {t.company && (
                         <>
                           <span className="mx-2 opacity-40">·</span>
-                          {t.company}
+                          <span data-edit={`testimonials.items.${index}.company`}>{t.company}</span>
                         </>
                       )}
                     </cite>

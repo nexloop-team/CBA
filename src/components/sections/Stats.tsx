@@ -30,12 +30,14 @@ export default async function Stats() {
           childrenStagger
           className="mt-8 grid grid-cols-2 gap-x-6 gap-y-8 md:mt-12 md:gap-y-12 lg:grid-cols-4"
         >
-          {studio.stats.map((stat) => (
+          {studio.stats.map((stat, i) => (
             <div key={stat.label}>
               <p className="display text-display-l">
                 <Counter to={stat.value} suffix={stat.suffix} />
               </p>
-              <p className="label text-ink/45 mt-3">{stat.label}</p>
+              <p className="label text-ink/45 mt-3" data-edit={`studio.stats.${i}.label`}>
+                {stat.label}
+              </p>
             </div>
           ))}
         </Reveal>

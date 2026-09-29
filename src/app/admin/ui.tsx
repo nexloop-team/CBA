@@ -2,6 +2,7 @@
 
 import type { ReactNode } from "react";
 import { ArrowDown, ArrowUp, Trash2 } from "lucide-react";
+import { usePreviewFocus } from "./Preview";
 
 /** Small form building blocks for /admin. Plain, large targets, no surprises. */
 
@@ -26,14 +27,18 @@ export function Card({
 export function Field({
   label,
   hint,
+  preview,
   children,
 }: {
   label: string;
   hint?: string;
+  /** `data-edit` key(s) of the site text this field controls, for the live preview. */
+  preview?: string | string[];
   children: ReactNode;
 }) {
+  const focus = usePreviewFocus();
   return (
-    <label className="block">
+    <label className="block" onFocus={preview ? () => focus(preview) : undefined}>
       <span className="text-sm font-medium text-slate-800">{label}</span>
       <div className="mt-1.5">{children}</div>
       {hint && <span className="mt-1 block text-xs text-slate-500">{hint}</span>}

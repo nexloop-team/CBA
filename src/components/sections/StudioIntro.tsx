@@ -35,13 +35,13 @@ export default async function StudioIntro({ images }: { images: ProjectImage[] }
             <h2 id="studio-heading" className="sr-only">
               About the studio
             </h2>
-            <RevealText mode="words" className="display text-display-m">
+            <RevealText mode="words" className="display text-display-m" edit="studio.intro">
               {studio.intro}
             </RevealText>
 
             <div className="text-ink/80 mt-10 max-w-prose space-y-5">
-              {studio.about.map((p) => (
-                <RevealText key={p.slice(0, 24)} className="text-lead">
+              {studio.about.map((p, i) => (
+                <RevealText key={p.slice(0, 24)} className="text-lead" edit={`studio.about.${i}`}>
                   {p}
                 </RevealText>
               ))}

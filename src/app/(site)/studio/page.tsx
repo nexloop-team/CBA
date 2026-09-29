@@ -34,7 +34,12 @@ export default async function StudioPage() {
           <RevealText as="h1" mode="chars" className="display text-display-xl mt-8 max-w-[14ch]">
             Studio
           </RevealText>
-          <RevealText mode="words" className="display text-display-m mt-12 max-w-4xl" delay={0.2}>
+          <RevealText
+            mode="words"
+            className="display text-display-m mt-12 max-w-4xl"
+            delay={0.2}
+            edit="studio.statement"
+          >
             {studio.statement}
           </RevealText>
         </div>
@@ -50,8 +55,12 @@ export default async function StudioPage() {
           <div className="md:col-span-5">
             <Figure image={portraitStandIn} ratio="4 / 5" sizes="(min-width: 768px) 38vw, 90vw" />
             <div className="mt-5">
-              <p className="display text-display-s">{studio.founder.name}</p>
-              <p className="label text-ink/45 mt-2">{studio.founder.title}</p>
+              <p className="display text-display-s" data-edit="studio.founder.name">
+                {studio.founder.name}
+              </p>
+              <p className="label text-ink/45 mt-2" data-edit="studio.founder.title">
+                {studio.founder.title}
+              </p>
             </div>
           </div>
 
@@ -63,12 +72,20 @@ export default async function StudioPage() {
               About
             </h2>
             <div className="text-lead text-ink/80 mt-6 max-w-[68ch] space-y-6">
-              {studio.about.map((p) => (
-                <RevealText key={p.slice(0, 24)}>{p}</RevealText>
+              {studio.about.map((p, i) => (
+                <RevealText key={p.slice(0, 24)} edit={`studio.about.${i}`}>
+                  {p}
+                </RevealText>
               ))}
-              {studio.founder.bio && <RevealText>{studio.founder.bio}</RevealText>}
+              {studio.founder.bio && (
+                <RevealText edit="studio.founder.bio">{studio.founder.bio}</RevealText>
+              )}
             </div>
-            {studio.credentials && <p className="label text-ink/45 mt-8">{studio.credentials}</p>}
+            {studio.credentials && (
+              <p className="label text-ink/45 mt-8" data-edit="studio.credentials">
+                {studio.credentials}
+              </p>
+            )}
           </div>
         </div>
       </section>

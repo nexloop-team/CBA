@@ -218,10 +218,10 @@ export default function Reels({ reels }: { reels: Reel[] }) {
               <p className="text-bone/80 mt-4 text-sm">
                 {reel.href ? (
                   <Link href={reel.href} className="border-bone/30 hover:border-bone border-b">
-                    {reel.caption}
+                    <span data-edit={`reels.items.${i}.caption`}>{reel.caption}</span>
                   </Link>
                 ) : (
-                  reel.caption
+                  <span data-edit={`reels.items.${i}.caption`}>{reel.caption}</span>
                 )}
               </p>
             </li>

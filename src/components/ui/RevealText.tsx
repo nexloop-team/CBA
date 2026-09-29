@@ -13,6 +13,8 @@ interface RevealTextProps {
   delay?: number;
   stagger?: number;
   start?: string;
+  /** Key the /admin live preview uses to find and update this text. */
+  edit?: string;
 }
 
 /**
@@ -31,6 +33,7 @@ export default function RevealText({
   delay = 0,
   stagger,
   start = "top 85%",
+  edit,
 }: RevealTextProps) {
   const ref = useRef<HTMLElement>(null);
 
@@ -76,7 +79,7 @@ export default function RevealText({
     // Starts hidden so it cannot be painted and then hidden again by GSAP's
     // from-state - that flash was visible as images appearing and vanishing.
     // The <noscript> rule in the root layout restores it when JS is off.
-    <Tag ref={ref} data-reveal className={cn("opacity-0", className)}>
+    <Tag ref={ref} data-reveal data-edit={edit} className={cn("opacity-0", className)}>
       {children}
     </Tag>
   );

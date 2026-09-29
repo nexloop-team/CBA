@@ -39,6 +39,7 @@ export default async function ContactPage() {
       icon: Mail,
       label: "Email",
       value: site.contact.email,
+      edit: "contact.email",
       href: mailHref(site),
       external: false,
       size: "text-display-s",
@@ -49,6 +50,7 @@ export default async function ContactPage() {
       icon: Phone,
       label: "Phone",
       value: `${site.contact.phoneDisplay} / ${site.contact.phoneSecondaryDisplay}`,
+      edit: "contact.phones",
       href: telHref(site),
       external: false,
       size: "text-display-s",
@@ -114,7 +116,12 @@ export default async function ContactPage() {
                         {...(channel.numeric ? { "data-numeric": true } : {})}
                         className={`display mt-2 block break-words ${channel.size}`}
                       >
-                        <span className="link-wipe">{channel.value}</span>
+                        <span
+                          className="link-wipe"
+                          data-edit={"edit" in channel ? channel.edit : undefined}
+                        >
+                          {channel.value}
+                        </span>
                       </span>
                     </a>
                   </li>
@@ -126,13 +133,17 @@ export default async function ContactPage() {
           <div className="md:col-span-4 md:col-start-9">
             <h2 className="label text-ink/45">Studio</h2>
             <address className="text-lead text-ink/80 mt-6 leading-relaxed not-italic">
-              {address.line1}
+              <span data-edit="contact.address.line1">{address.line1}</span>
               <br />
-              {address.city}, {address.state} {address.postalCode}
+              <span data-edit="contact.cityLine">
+                {address.city}, {address.state} {address.postalCode}
+              </span>
             </address>
 
             <h2 className="label text-ink/45 mt-10">Hours</h2>
-            <p className="text-lead text-ink/80 mt-4">{site.contact.hours}</p>
+            <p className="text-lead text-ink/80 mt-4" data-edit="contact.hours">
+              {site.contact.hours}
+            </p>
           </div>
         </div>
       </section>

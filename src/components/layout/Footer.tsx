@@ -34,7 +34,9 @@ export default async function Footer() {
               decoding="async"
               className="h-16 w-auto md:h-20"
             />
-            <p className="mt-7 max-w-xs text-sm opacity-60">{site.tagline}</p>
+            <p className="mt-7 max-w-xs text-sm opacity-60" data-edit="brand.tagline">
+              {site.tagline}
+            </p>
           </div>
 
           {/*
@@ -72,14 +74,21 @@ export default async function Footer() {
                       href={mailHref(site)}
                       className={`${linkClass.replace("inline-block", "block")} [overflow-wrap:anywhere]`}
                     >
-                      {site.contact.email.split("@")[0]}
-                      <wbr />@{site.contact.email.split("@")[1]}
+                      <span data-edit="contact.email">
+                        {site.contact.email.split("@")[0]}
+                        <wbr />@{site.contact.email.split("@")[1]}
+                      </span>
                     </a>
                   </li>
                 )}
                 {showPhone && (
                   <li>
-                    <a href={telHref(site)} data-numeric className={linkClass}>
+                    <a
+                      href={telHref(site)}
+                      data-numeric
+                      data-edit="contact.phoneDisplay"
+                      className={linkClass}
+                    >
                       {site.contact.phoneDisplay}
                     </a>
                   </li>
@@ -106,12 +115,14 @@ export default async function Footer() {
               <div className="mt-5 space-y-4 text-sm opacity-60">
                 {showAddress && (
                   <address className="not-italic">
-                    {address.line1}
+                    <span data-edit="contact.address.line1">{address.line1}</span>
                     <br />
-                    {address.city}, {address.state} {address.postalCode}
+                    <span data-edit="contact.cityLine">
+                      {address.city}, {address.state} {address.postalCode}
+                    </span>
                   </address>
                 )}
-                <p>{site.contact.hours}</p>
+                <p data-edit="contact.hours">{site.contact.hours}</p>
               </div>
             </div>
           </div>
